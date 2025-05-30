@@ -92,7 +92,7 @@
                             <i class="bi bi-briefcase fs-1"></i>
                         </div>
                         <h4>Experiencia Comprobada</h4>
-                        <p>Más de dos décadas de experiencia en el ámbito legal e inmobiliario.</p>
+                        <p>Más de 5 años de experiencia en el ámbito legal e inmobiliario.</p>
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
