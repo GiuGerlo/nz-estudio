@@ -3,7 +3,7 @@
     <div class="container" data-aos="fade-up">
         <!-- Header Section -->
         <div class="section-header text-center mb-5">
-            <span class="subtitle text-uppercase fw-bold text-primary">Sobre Nosotros</span>
+            <span class="section-badge">Sobre Nosotros</span>
             <h2 class="mb-4">Conocé Nuestra Historia</h2>
             <div class="section-divider">
                 <span></span>
