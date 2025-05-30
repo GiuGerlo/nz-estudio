@@ -24,11 +24,11 @@
     </div>
 
     <!-- Información de Contacto -->
-    <div class="contact-info-section py-5">
+    <!-- <div class="contact-info-section py-5">
         <div class="container">
-            <div class="row g-4">
+            <div class="row g-4"> -->
                 <!-- Dirección -->
-                <div class="col-12 col-sm-6 col-md-3">
+                <!-- <div class="col-12 col-sm-6 col-md-3">
                     <div class="info-box text-center p-4 h-100">
                         <div class="info-icon mb-3">
                             <i class="bi bi-geo-alt"></i>
@@ -36,10 +36,10 @@
                         <h4>Ubicación</h4>
                         <p class="mb-0">Catamarca 227, Guatimozín, Córdoba</p>
                     </div>
-                </div>
+                </div> -->
                 
                 <!-- Horario -->
-                <div class="col-12 col-sm-6 col-md-3">
+                <!-- <div class="col-12 col-sm-6 col-md-3">
                     <div class="info-box text-center p-4 h-100">
                         <div class="info-icon mb-3">
                             <i class="bi bi-clock"></i>
@@ -47,10 +47,10 @@
                         <h4>Horario</h4>
                         <p class="mb-0">Lunes a Viernes <br> 8:00 - 12:00 <br> 16:00 - 19:00</p>
                     </div>
-                </div>
+                </div> -->
                 
                 <!-- Email -->
-                <div class="col-12 col-sm-6 col-md-3">
+                <!-- <div class="col-12 col-sm-6 col-md-3">
                     <div class="info-box text-center p-4 h-100">
                         <div class="info-icon mb-3">
                             <i class="bi bi-envelope"></i>
@@ -58,10 +58,10 @@
                         <h4>Email</h4>
                         <p class="mb-0">nadinazaranich@gmail.com</p>
                     </div>
-                </div>
+                </div> -->
                 
                 <!-- Teléfono -->
-                <div class="col-12 col-sm-6 col-md-3">
+                <!-- <div class="col-12 col-sm-6 col-md-3">
                     <div class="info-box text-center p-4 h-100">
                         <div class="info-icon mb-3">
                             <i class="bi bi-telephone"></i>
@@ -69,9 +69,9 @@
                         <h4>Teléfono</h4>
                         <p class="mb-0">3468525227</p>
                     </div>
-                </div>
-        </div>
-    </div>
+                </div> -->
+        <!-- </div>
+    </div> -->
     <!-- Botones flotantes -->
     <div class="social-buttons">
         <!-- WhatsApp -->
