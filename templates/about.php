@@ -118,7 +118,7 @@
                 <p class="mb-0">Contáctanos hoy mismo para una consulta sin compromiso.</p>
             </div>
             <div class="col-lg-4 text-lg-end mt-4 mt-lg-0" data-aos="fade-left">
-                <a href="contacto.php" class="btn btn-primary btn-lg px-4">Contáctanos</a>
+                <a href="#contacto" class="btn btn-primary btn-lg px-4">Contáctanos</a>
             </div>
         </div>
     </div>

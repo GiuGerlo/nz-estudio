@@ -40,8 +40,8 @@
 
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="#hero" class="active">Inicio</a></li>
-                    <li><a href="#about">Alquiler</a></li>
+                    <li><a href="inicio" class="active">Inicio</a></li>
+                    <li><a href="alquiler">Alquiler</a></li>
                     <li class="dropdown"><a href="#"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
                             <li><a href="#">Propiedades</a></li>
@@ -51,8 +51,8 @@
                             <li><a href="#">Departamento</a></li>
                         </ul>
                     </li>
-                    <li><a href="#portfolio">Vendida</a></li>
-                    <li><a href="#contact">Contacto</a></li>
+                    <li><a href="vendida">Vendida</a></li>
+                    <li><a href="inicio#contacto">Contacto</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>

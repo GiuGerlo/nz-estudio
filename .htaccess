@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Si la petición es un archivo real o directorio, no hacer nada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirigir rutas amigables a index.php?seccion=nombre
+RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?seccion=$1 [QSA,L]
+
+# Redirigir la raíz a /inicio
+RewriteRule ^$ index.php?seccion=inicio [QSA,L]
