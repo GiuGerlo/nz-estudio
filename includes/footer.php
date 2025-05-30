@@ -79,10 +79,16 @@
     <script src="assets/vendor/php-email-form/validate.js"></script>
     <script src="assets/vendor/aos/aos.js"></script>
 
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- AOS Animation -->
     <script>
-        AOS.init();
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
     </script>
 
     <!-- Main JS File -->

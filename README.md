@@ -16,6 +16,7 @@ Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, dise
 - **Servicios**: Listado detallado de áreas de práctica
 - **Equipo**: Perfiles profesionales del equipo
 - **Contacto**: Formulario de contacto y ubicación con Google Maps
+- **Login**: Sistema de autenticación para administradores
 
 ### 📱 Diseño Responsivo
 - Adaptable a todos los dispositivos (móviles, tablets, escritorio)
@@ -33,6 +34,7 @@ Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, dise
 
 #### Backend
 - **PHP** - Procesamiento del lado del servidor
+- **MySQL** - Base de datos para usuarios y autenticación
 - **XAMPP** - Entorno de desarrollo local
 
 ## 🚀 Instalación
@@ -62,11 +64,57 @@ nz-estudio/
 │   ├── css/           # Hojas de estilo
 │   ├── js/            # Archivos JavaScript
 │   └── img/           # Imágenes y recursos gráficos
+├── config/            # Archivos de configuración
+│   └── config.php     # Configuración de la base de datos
 ├── includes/          # Archivos PHP reutilizables
+│   ├── auth_check.php # Verificación de autenticación
+│   └── head.php       # Encabezado común
 ├── templates/         # Plantillas de páginas
+├── auth.php           # Procesamiento de autenticación
+├── login.php          # Página de inicio de sesión
+├── logout.php         # Cierre de sesión
 ├── index.php          # Página de inicio
 └── README.md          # Este archivo
 ```
+
+## 🔐 Sistema de Autenticación
+
+El sitio incluye un sistema de autenticación seguro para el panel de administración.
+
+### Características:
+- Validación de formularios en el cliente y el servidor
+- Protección contra ataques de inyección SQL
+- Manejo de sesiones seguras
+- Interfaz de usuario intuitiva con mensajes de retroalimentación
+
+### Credenciales por defecto:
+- **Usuario**: admin@example.com
+- **Contraseña**: password
+
+### Estructura de la base de datos:
+
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insertar usuario de prueba (contraseña: password)
+INSERT INTO users (email, password) 
+VALUES ('admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+```
+
+## 🔒 Seguridad
+
+Se han implementado las siguientes medidas de seguridad:
+
+- **Protección contra inyección SQL**: Uso de consultas preparadas
+- **Hash de contraseñas**: Uso de `password_hash()` para almacenar contraseñas de forma segura
+- **Validación de entrada**: Filtrado y validación de todos los datos de entrada
+- **Manejo de sesiones seguras**: Configuración adecuada de las cookies de sesión
+- **Protección CSRF**: Implementada en los formularios críticos
 
 ## 🎯 Objetivos del Proyecto
 
@@ -92,5 +140,5 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 
 ---
 <div align="center">
-  Hecho con ❤️ por el equipo de NZ Estudio Jurídico
+  Hecho con ❤️ por el equipo de Artisans Thinking
 </div>

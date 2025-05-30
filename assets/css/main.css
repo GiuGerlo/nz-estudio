@@ -51,6 +51,129 @@
 }
 
 /*--------------------------------------------------------------
+# Login Page
+--------------------------------------------------------------*/
+.login-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    background-color: var(--background-color);
+    padding: 4rem 0;
+}
+
+.login-section .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: var(--surface-color);
+}
+
+.login-section .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.login-section .card-body {
+    padding: 3rem;
+}
+
+.login-section h2 {
+    color: var(--accent-color);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-family: var(--heading-font);
+}
+
+.login-section .text-muted {
+    color: #6c757d !important;
+    margin-bottom: 2rem;
+    display: block;
+}
+
+.login-section .form-label {
+    color: var(--heading-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.login-section .form-control {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background-color: #f8f9fa;
+}
+
+.login-section .form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(10, 48, 92, 0.15);
+    background-color: #fff;
+}
+
+.login-section .btn-primary {
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.login-section .btn-primary:hover {
+    background-color: #082547;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(10, 48, 92, 0.2);
+}
+
+.login-section .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Efecto de borde inferior en los inputs */
+.login-section .input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.login-section .input-group:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+.login-section .input-group:focus-within:after {
+    width: 100%;
+}
+
+/* Estilo para el enlace de olvidé mi contraseña */
+.login-section .forgot-password {
+    display: block;
+    text-align: right;
+    margin-top: 0.5rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.login-section .forgot-password:hover {
+    color: #082547;
+    text-decoration: underline;
+}
+
+/*--------------------------------------------------------------
 # General Styling & Shared Classes
 --------------------------------------------------------------*/
 body {

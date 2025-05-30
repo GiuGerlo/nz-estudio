@@ -21,6 +21,7 @@
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
     <!-- Main CSS File -->
     <link href="assets/css/main.css" rel="stylesheet">

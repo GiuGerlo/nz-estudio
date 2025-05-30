@@ -96,4 +96,51 @@
   }
   window.addEventListener('load', aosInit);
 
+  /**
+   * Login Form Handling
+   */
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(loginForm);
+      
+      fetch('auth.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Bienvenido!',
+            text: 'Inicio de sesión exitoso',
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            window.location.href = 'inicio';
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message || 'Credenciales incorrectas',
+            confirmButtonColor: '#2c5f87'
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al procesar la solicitud',
+          confirmButtonColor: '#2c5f87'
+        });
+      });
+    });
+  }
+
 })();
