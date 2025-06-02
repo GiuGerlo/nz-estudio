@@ -13,21 +13,6 @@ $controller = new ControllerCategorias($db);
 $resultado = $controller->obtenerCategorias();
 $categorias = $resultado['data'] ?? null;
 
-// Agregar scripts adicionales para DataTables
-$additionalScripts = '
-<!-- DataTables JS -->
-<script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-';
 ?>
 
 <!-- Contenido principal -->
@@ -131,8 +116,6 @@ $additionalScripts = '
 <!-- Incluir SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<?php echo $additionalScripts; ?>
-
 <!-- Script para gestionar categorías -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -142,73 +125,88 @@ $additionalScripts = '
         const modalTitle = document.getElementById('categoriaModalLabel');
         const btnGuardar = document.getElementById('btnGuardar');
         
-        // Inicializar DataTables
-        const tablaCategorias = $('#tabla-categorias').DataTable({
-            responsive: true,
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
-            },
-            dom: '<"d-flex justify-content-between align-items-center mb-3"<"d-flex align-items-center"l><"d-flex align-items-center"f>>rt<"d-flex justify-content-between align-items-center"<"d-flex align-items-center"i><"d-flex align-items-center"p>>',
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            buttons: [
-                {
-                    extend: 'collection',
-                    text: '<i class="fas fa-download me-1"></i> Exportar',
-                    className: 'btn-custom-blue',
+        // Esperar a que jQuery y DataTables estén disponibles
+        $(document).ready(function() {
+            // Verificar si las funciones de DataTables están disponibles
+            if (typeof initDataTable === 'function' && typeof addExportButtons === 'function') {
+                // Inicializar DataTables con opciones específicas para categorías
+                const tablaCategorias = initDataTable('#tabla-categorias', {
+                    columnDefs: [
+                        { responsivePriority: 1, targets: 0 },
+                        { responsivePriority: 2, targets: 1 },
+                        { responsivePriority: 3, targets: 3 }
+                    ]
+                });
+                
+                // Agregar botones de exportación
+                addExportButtons(tablaCategorias, 'Categorías de Propiedades');
+            } else {
+                // Si las funciones no están disponibles, inicializar DataTables directamente
+                const tablaCategorias = $('#tabla-categorias').DataTable({
+                    responsive: true,
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+                    },
+                    dom: '<"d-flex justify-content-between align-items-center mb-3"<"d-flex align-items-center"l><"d-flex align-items-center"f>>rt<"d-flex justify-content-between align-items-center"<"d-flex align-items-center"i><"d-flex align-items-center"p>>',
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    order: [[0, 'asc']],
+                    columnDefs: [
+                        { responsivePriority: 1, targets: 0 },
+                        { responsivePriority: 2, targets: 1 },
+                        { responsivePriority: 3, targets: 3 }
+                    ],
                     buttons: [
                         {
-                            extend: 'excel',
-                            text: '<i class="fas fa-file-excel me-1"></i> Excel',
-                            exportOptions: {
-                                columns: [0, 1, 2]
-                            },
-                            title: 'Categorías de Propiedades'
-                        },
-                        {
-                            extend: 'pdf',
-                            text: '<i class="fas fa-file-pdf me-1"></i> PDF',
-                            exportOptions: {
-                                columns: [0, 1, 2]
-                            },
-                            title: 'Categorías de Propiedades'
-                        },
-                        {
-                            extend: 'print',
-                            text: '<i class="fas fa-print me-1"></i> Imprimir',
-                            exportOptions: {
-                                columns: [0, 1, 2]
-                            },
-                            title: 'Categorías de Propiedades'
+                            extend: 'collection',
+                            text: '<i class="fas fa-download me-1"></i> Exportar',
+                            className: 'btn-custom-blue',
+                            buttons: [
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                                    exportOptions: {
+                                        columns: [0, 1, 2]
+                                    },
+                                    title: 'Categorías de Propiedades'
+                                },
+                                {
+                                    extend: 'pdf',
+                                    text: '<i class="fas fa-file-pdf me-1"></i> PDF',
+                                    exportOptions: {
+                                        columns: [0, 1, 2]
+                                    },
+                                    title: 'Categorías de Propiedades'
+                                },
+                                {
+                                    extend: 'print',
+                                    text: '<i class="fas fa-print me-1"></i> Imprimir',
+                                    exportOptions: {
+                                        columns: [0, 1, 2]
+                                    },
+                                    title: 'Categorías de Propiedades'
+                                }
+                            ]
                         }
                     ]
-                }
-            ],
-            order: [[0, 'asc']],
-            columnDefs: [
-                { responsivePriority: 1, targets: 0 },
-                { responsivePriority: 2, targets: 1 },
-                { responsivePriority: 3, targets: 3 }
-            ]
-        });
-        
-        // Agregar botones de exportación a la tabla
-        new $.fn.dataTable.Buttons(tablaCategorias, {
-            buttons: [
-                {
-                    extend: 'collection',
-                    text: '<i class="fas fa-download me-1"></i> Exportar',
-                    className: 'btn-custom-blue',
+                });
+                
+                // Agregar botones de exportación a la tabla
+                new $.fn.dataTable.Buttons(tablaCategorias, {
                     buttons: [
-                        'excel', 'pdf', 'print'
+                        {
+                            extend: 'collection',
+                            text: '<i class="fas fa-download me-1"></i> Exportar',
+                            className: 'btn-custom-blue',
+                            buttons: [
+                                'excel', 'pdf', 'print'
+                            ]
+                        }
                     ]
-                }
-            ]
+                });
+                
+                tablaCategorias.buttons().container().appendTo('#tabla-categorias_wrapper .dt-buttons');
+            }
         });
-        
-        tablaCategorias.buttons().container().appendTo('#tabla-categorias_wrapper .dt-buttons');
-        
-        // Mostrar hora Argentina (UTC-3)
-        actualizarHora();
 
         // Manejar envío del formulario
         formCategoria.addEventListener('submit', function(e) {
@@ -347,100 +345,14 @@ $additionalScripts = '
             });
         });
 
-        // Función para actualizar la hora de Argentina (UTC-3)
-        function actualizarHora() {
-            const ahora = new Date();
-
-            // Ajustar a UTC-3 (Argentina)
-            const horaArgentina = new Date(ahora.getTime());
-
-            const opciones = {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-                timeZone: 'America/Argentina/Buenos_Aires'
-            };
-
-            const horaFormateada = horaArgentina.toLocaleTimeString('es-AR', opciones);
-
-            // Actualizar el elemento en el DOM
-            const elementoHora = document.getElementById('hora-actual');
-            if (elementoHora) {
-                elementoHora.textContent = horaFormateada;
-            }
-
-            // Actualizar cada segundo
-            setTimeout(actualizarHora, 1000);
+        // Inicializar reloj Argentina (UTC-3)
+        if (typeof actualizarHora === 'function') {
+            actualizarHora();
         }
     });
 </script>
 
-<?php
-// Agregar estilos personalizados para DataTables
-?>
-<style>
-    /* Estilos personalizados para DataTables */
-    .dataTables_wrapper .dataTables_length select {
-        padding: 0.375rem 2.25rem 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-    
-    .dataTables_wrapper .dataTables_filter input {
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #212529;
-        background-color: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-    
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        border-radius: 0.25rem;
-        margin: 0 2px;
-    }
-    
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background: var(--custom-blue);
-        border-color: var(--custom-blue);
-        color: white !important;
-    }
-    
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-        background: #e9ecef;
-        border-color: #dee2e6;
-        color: #212529 !important;
-    }
-    
-    .dataTables_wrapper .dt-buttons .btn {
-        margin-right: 5px;
-    }
-    
-    /* Estilos responsivos */
-    @media (max-width: 767px) {
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_filter,
-        .dataTables_wrapper .dataTables_info,
-        .dataTables_wrapper .dataTables_paginate {
-            text-align: left;
-            margin-bottom: 10px;
-        }
-        
-        .dataTables_wrapper .dt-buttons {
-            margin-bottom: 10px;
-        }
-    }
-</style>
+
 
 <?php
 // Incluir pie de página
