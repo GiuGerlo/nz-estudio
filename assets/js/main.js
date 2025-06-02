@@ -120,7 +120,7 @@
             showConfirmButton: false,
             timer: 1500
           }).then(() => {
-            window.location.href = 'inicio';
+            window.location.href = 'admin/admin.php';
           });
         } else {
           Swal.fire({

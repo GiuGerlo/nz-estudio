@@ -1,0 +1,85 @@
+<?php
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../login.php');
+    exit;
+}
+
+// Obtener la página actual para marcar el menú activo
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - NZ Estudio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="px-3 mb-4 sidebar-brand">
+            <h3>NZ Estudio</h3>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page == 'admin.php') ? 'active' : ''; ?>" href="admin.php">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page == 'propiedades.php') ? 'active' : ''; ?>" href="propiedades.php">
+                    <i class="fas fa-building"></i>
+                    <span>Propiedades</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page == 'propiedades_vendidas.php') ? 'active' : ''; ?>" href="propiedades_vendidas.php">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Vendidas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page == 'categorias.php') ? 'active' : ''; ?>" href="categorias.php">
+                    <i class="fas fa-tags"></i>
+                    <span>Categorías</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="../logout.php">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg mb-4 rounded">
+            <div class="container-fluid">
+                <button class="btn d-lg-none toggle-sidebar" type="button">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="navbar-brand mb-0 h1">Panel de Administración</span>
+                <div class="ms-auto d-flex align-items-center">
+                    <span id="hora-actual" class="me-3 d-none d-md-block text-muted"></span>
+                    <div class="dropdown user-dropdown">
+                        <a class="dropdown-toggle d-flex align-items-center text-decoration-none" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="User Avatar">
+                            <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['user_email']); ?></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="perfil.php"><i class="fas fa-user me-2"></i> Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
