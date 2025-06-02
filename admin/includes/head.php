@@ -17,14 +17,23 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="assets/css/main.css">
+    <?php if (isset($includeDataTablesStyles) && $includeDataTablesStyles): ?>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <?php endif; ?>
+    
+    <!-- jQuery (necesario para DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="px-3 mb-4 sidebar-brand">
-            <h3>NZ Estudio</h3>
+            <a href="admin.php"><img src="../assets/img/logo.png" alt="NZ Estudio" class="img-fluid" style="width: 80px;"></a>
         </div>
-        <ul class="nav flex-column">
+        <ul class="nav flex-column">    
             <li class="nav-item">
                 <a class="nav-link <?php echo ($current_page == 'admin.php') ? 'active' : ''; ?>" href="admin.php">
                     <i class="fas fa-tachometer-alt"></i>
@@ -67,19 +76,5 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="fas fa-bars"></i>
                 </button>
                 <span class="navbar-brand mb-0 h1">Panel de Administración</span>
-                <div class="ms-auto d-flex align-items-center">
-                    <span id="hora-actual" class="me-3 d-none d-md-block text-muted"></span>
-                    <div class="dropdown user-dropdown">
-                        <a class="dropdown-toggle d-flex align-items-center text-decoration-none" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="User Avatar">
-                            <span class="d-none d-md-inline"><?php echo htmlspecialchars($_SESSION['user_email']); ?></span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="perfil.php"><i class="fas fa-user me-2"></i> Perfil</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a></li>
-                        </ul>
-                    </div>
-                </div>
             </div>
         </nav>
