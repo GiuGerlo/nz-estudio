@@ -1,10 +1,7 @@
 <?php
 require_once '../config/config.php';
-
 $includeDataTablesStyles = true;
-
 require_once 'includes/head.php';
-
 
 // Obtener las propiedades
 $query = "SELECT p.*, tp.nombre_categoria, 
@@ -16,65 +13,83 @@ $resultado = $db->query($query);
 ?>
 
 <div class="container-fluid px-4">
-    <h1 class="h3 mb-4">Gestión de Propiedades</h1>
-
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Listado de Propiedades</h5>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPropiedad">
-                <i class="fas fa-plus"></i> Nueva Propiedad
-            </button>
+    <!-- Header simplificado y mejorado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-building fa-2x text-primary me-3"></i>
+            <div>
+                <h1 class="h3 mb-0">Gestión de Propiedades</h1>
+                <p class="text-muted mb-0">Administra tus propiedades aquí</p>
+            </div>
         </div>
+        <button type="button" class="btn btn-custom-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPropiedad">
+            <i class="fas fa-plus-circle me-2"></i>Nueva Propiedad
+        </button>
+    </div>
+
+    <!-- Tabla mejorada -->
+    <div class="card shadow-sm border-0">
         <div class="card-body">
-            <table id="tablaPropiedades" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Imagen</th>
-                        <th>Título</th>
-                        <th>Categoría</th>
-                        <th>Localidad</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($propiedad = $resultado->fetch_assoc()): ?>
+            <div class="table-responsive">
+                <table id="tablaPropiedades" class="table table-hover" style="width:100%">
+                    <thead>
                         <tr>
-                            <td><?php echo $propiedad['id']; ?></td>
-                            <td>
-                                <?php if ($propiedad['imagen_principal']): ?>
-                                    <img src="../<?php echo $propiedad['imagen_principal']; ?>"
-                                        alt="Imagen de propiedad"
-                                        style="width: 50px; height: 50px; object-fit: cover;">
-                                <?php else: ?>
-                                    <img src="../assets/img/no-image.jpg"
-                                        alt="Sin imagen"
-                                        style="width: 50px; height: 50px; object-fit: cover;">
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo htmlspecialchars($propiedad['titulo']); ?></td>
-                            <td><?php echo htmlspecialchars($propiedad['nombre_categoria']); ?></td>
-                            <td><?php echo htmlspecialchars($propiedad['localidad']); ?></td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-info"
-                                        onclick="editarPropiedad(<?php echo $propiedad['id']; ?>)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger"
-                                        onclick="confirmarEliminacion(<?php echo $propiedad['id']; ?>)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-success"
-                                        onclick="marcarVendida(<?php echo $propiedad['id']; ?>)">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </div>
-                            </td>
+                            <th class="text-center" style="width: 80px">ID</th>
+                            <th style="width: 100px">Imagen</th>
+                            <th>Título</th>
+                            <th style="width: 150px">Categoría</th>
+                            <th style="width: 150px">Localidad</th>
+                            <th class="text-center" style="width: 120px">Acciones</th>
                         </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php while ($propiedad = $resultado->fetch_assoc()): ?>
+                            <tr>
+                                <td class="text-center align-middle"><?php echo $propiedad['id']; ?></td>
+                                <td>
+                                    <div class="property-image-wrapper">
+                                        <?php if ($propiedad['imagen_principal']): ?>
+                                            <img src="../<?php echo $propiedad['imagen_principal']; ?>"
+                                                 alt="Imagen de propiedad"
+                                                 class="property-image">
+                                        <?php else: ?>
+                                            <img src="../assets/img/no-image.jpg"
+                                                 alt="Sin imagen"
+                                                 class="property-image">
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="align-middle fw-semibold"><?php echo htmlspecialchars($propiedad['titulo']); ?></td>
+                                <td class="align-middle">
+                                    <span class="badge rounded-pill bg-info text-white">
+                                        <?php echo htmlspecialchars($propiedad['nombre_categoria']); ?>
+                                    </span>
+                                </td>
+                                <td class="align-middle"><?php echo htmlspecialchars($propiedad['localidad']); ?></td>
+                                <td class="text-center align-middle">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" 
+                                                onclick="editarPropiedad(<?php echo $propiedad['id']; ?>)"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="confirmarEliminacion(<?php echo $propiedad['id']; ?>)"
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success" 
+                                                onclick="marcarVendida(<?php echo $propiedad['id']; ?>)"
+                                                title="Marcar como vendida">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -82,16 +97,109 @@ $resultado = $db->query($query);
 <!-- Incluir el modal -->
 <?php require_once 'templates/modal_propiedad.php'; ?>
 
+<style>
+/* Estilos refinados */
+.property-image-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.property-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.property-image:hover {
+    transform: scale(1.1);
+}
+
+.badge {
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.5em 1em;
+}
+
+.btn-group .btn {
+    padding: 0.375rem 0.75rem;
+}
+
+.table > :not(caption) > * > * {
+    padding: 1rem 0.75rem;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+/* Personalización mejorada de DataTables */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
+}
+
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    font-weight: 500;
+    color: #555;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #e9ecef !important;
+    border-color: #dee2e6 !important;
+    color: var(--color-accent) !important;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    min-width: 80px;
+    margin: 0 5px;
+}
+
+.dataTables_info {
+    color: #666;
+    padding-top: 0.5rem;
+}
+</style>
+
 <script>
     $(document).ready(function() {
         $('#tablaPropiedades').DataTable({
             responsive: true,
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
+                lengthMenu: 'Mostrar _MENU_ registros por página',
+                info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                infoEmpty: 'No hay registros disponibles',
+                search: 'Buscar:',
+                paginate: {
+                    first: '«',
+                    previous: '‹',
+                    next: '›',
+                    last: '»'
+                }
             },
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
+            pageLength: 25, // Cambiar a 25 registros por página
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]], // Opciones de registros por página
+            dom: '<"row mb-3"<"col-sm-6"l><"col-sm-6"f>>rtip',
+            order: [[0, 'desc']],
+            columnDefs: [
+                {
+                    targets: [1],
+                    orderable: false
+                },
+                {
+                    targets: [5],
+                    orderable: false,
+                    searchable: false
+                }
             ]
         });
 
@@ -196,10 +304,8 @@ $resultado = $db->query($query);
     }
 
     function editarPropiedad(id) {
-        // Cambiar el título del modal
         $('#modalPropiedadLabel').text('Editar Propiedad');
-
-        // Realizar la petición AJAX para obtener los datos
+        
         $.ajax({
             url: 'controllers/controller_propiedades.php',
             type: 'GET',
@@ -209,9 +315,8 @@ $resultado = $db->query($query);
             },
             success: function(response) {
                 let data = typeof response === 'string' ? JSON.parse(response) : response;
-
-                if (data.success) {
-                    // Llenar el formulario con los datos
+                
+                if(data.success) {
                     $('#propiedad_id').val(data.data.id);
                     $('#titulo').val(data.data.titulo);
                     $('#categoria').val(data.data.categoria);
@@ -221,23 +326,12 @@ $resultado = $db->query($query);
                     $('#servicios').val(data.data.servicios);
                     $('#caracteristicas').val(data.data.caracteristicas);
                     $('#mapa').val(data.data.mapa);
-
-                    // Mostrar imágenes existentes si las hay
-                    if (data.data.imagenes) {
-                        let previewHtml = '';
-                        data.data.imagenes.forEach(imagen => {
-                            previewHtml += `
-                                <div class="col-md-3">
-                                    <div class="card">
-                                        <img src="../${imagen.ruta_imagen}" class="card-img-top" 
-                                             style="height: 150px; object-fit: cover;">
-                                    </div>
-                                </div>`;
-                        });
-                        $('#preview-imagenes').html(previewHtml);
+                    
+                    // Usar la función global para actualizar el preview
+                    if(data.data.imagenes) {
+                        window.actualizarPreviewImagenes(data.data.imagenes);
                     }
-
-                    // Abrir el modal
+                    
                     $('#modalPropiedad').modal('show');
                 } else {
                     Swal.fire({

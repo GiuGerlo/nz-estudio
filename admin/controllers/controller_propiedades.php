@@ -18,8 +18,87 @@ function sendJsonResponse($success, $message, $data = null)
     exit;
 }
 
+function convertToWebP($source, $destination, $quality = 80) {
+    $info = getimagesize($source);
+    $isValid = true;
+
+    if ($info['mime'] === 'image/jpeg') {
+        $image = imagecreatefromjpeg($source);
+    } elseif ($info['mime'] === 'image/png') {
+        $image = imagecreatefrompng($source);
+        imagepalettetotruecolor($image);
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
+    } elseif ($info['mime'] === 'image/gif') {
+        $image = imagecreatefromgif($source);
+    } else {
+        $isValid = false;
+    }
+
+    if ($isValid) {
+        // Crear el directorio si no existe
+        $dir = dirname($destination);
+        if (!file_exists($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        // Convertir y guardar como WebP
+        $result = imagewebp($image, $destination, $quality);
+        imagedestroy($image);
+        return $result;
+    }
+    return false;
+}
+
 // Si es una petición POST, procesar el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Manejar la eliminación de imagen individual
+    if(isset($_POST['action']) && $_POST['action'] === 'eliminar_imagen') {
+        try {
+            $imagen_id = (int)$_POST['imagen_id'];
+            
+            // Verificar que no sea la última imagen
+            $stmt = $db->prepare("SELECT ip.*, p.id as propiedad_id, tp.nombre_categoria 
+                                FROM imagenes_propiedades ip 
+                                INNER JOIN propiedades p ON ip.id_propiedad = p.id 
+                                INNER JOIN tipos_propiedad tp ON p.categoria = tp.id 
+                                WHERE ip.id = ?");
+            $stmt->bind_param("i", $imagen_id);
+            $stmt->execute();
+            $imagen = $stmt->get_result()->fetch_assoc();
+            
+            if($imagen) {
+                // Verificar cantidad de imágenes
+                $count = $db->query("SELECT COUNT(*) as total FROM imagenes_propiedades WHERE id_propiedad = {$imagen['propiedad_id']}")->fetch_assoc()['total'];
+                
+                if($count <= 1) {
+                    sendJsonResponse(false, 'Debe mantener al menos una imagen');
+                    exit;
+                }
+                
+                // Eliminar archivo físico
+                if(file_exists("../../" . $imagen['ruta_imagen'])) {
+                    unlink("../../" . $imagen['ruta_imagen']);
+                }
+                
+                // Eliminar registro de la base de datos
+                $stmt = $db->prepare("DELETE FROM imagenes_propiedades WHERE id = ?");
+                $stmt->bind_param("i", $imagen_id);
+                
+                if($stmt->execute()) {
+                    sendJsonResponse(true, 'Imagen eliminada correctamente');
+                } else {
+                    sendJsonResponse(false, 'Error al eliminar la imagen de la base de datos');
+                }
+            } else {
+                sendJsonResponse(false, 'Imagen no encontrada');
+            }
+        } catch(Exception $e) {
+            sendJsonResponse(false, 'Error: ' . $e->getMessage());
+        }
+        exit;
+    }
+
     try {
         $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
         $titulo = $db->real_escape_string($_POST['titulo']);
@@ -72,21 +151,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             $propiedad_id = $id ?: $db->insert_id;
 
+            // Obtener la categoría de la propiedad para la estructura de carpetas
+            $stmt = $db->prepare("SELECT tp.nombre_categoria FROM tipos_propiedad tp 
+                                INNER JOIN propiedades p ON p.categoria = tp.id 
+                                WHERE p.id = ?");
+            $stmt->bind_param("i", $propiedad_id);
+            $stmt->execute();
+            $categoria_nombre = $stmt->get_result()->fetch_assoc()['nombre_categoria'];
+            $categoria_nombre = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $categoria_nombre));
+
             // Procesar imágenes si se enviaron
             if (!empty($_FILES['imagenes']['name'][0])) {
-                $uploadDir = '../../uploads/propiedades/';
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
+                // Crear estructura de directorios
+                $base_dir = '../../uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id;
+                if (!file_exists($base_dir)) {
+                    mkdir($base_dir, 0777, true);
                 }
 
                 foreach ($_FILES['imagenes']['tmp_name'] as $key => $tmp_name) {
-                    $filename = uniqid() . '_' . $_FILES['imagenes']['name'][$key];
-                    $uploadFile = $uploadDir . $filename;
-
-                    if (move_uploaded_file($tmp_name, $uploadFile)) {
-                        $ruta_imagen = 'uploads/propiedades/' . $filename;
-                        $db->query("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen) 
-                                  VALUES ($propiedad_id, '$ruta_imagen')");
+                    if ($_FILES['imagenes']['error'][$key] === 0) {
+                        $filename = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9.]/', '_', $_FILES['imagenes']['name'][$key]);
+                        $webp_filename = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+                        $uploadFile = $base_dir . '/' . $webp_filename;
+                        
+                        if (convertToWebP($tmp_name, $uploadFile)) {
+                            $ruta_imagen = 'uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id . '/' . $webp_filename;
+                            $db->query("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen) 
+                                      VALUES ($propiedad_id, '$ruta_imagen')");
+                        }
                     }
                 }
             }
@@ -95,6 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             sendJsonResponse(false, 'Error al guardar la propiedad');
         }
+
     } catch (Exception $e) {
         sendJsonResponse(false, 'Error: ' . $e->getMessage());
     }
@@ -108,32 +201,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'obtener':
             if (isset($_GET['id'])) {
                 $id = (int)$_GET['id'];
-
-                // Obtener datos de la propiedad
+                
+                // Modificar la consulta para obtener los datos completos de las imágenes
                 $query = "SELECT p.*, 
-                         (SELECT GROUP_CONCAT(ruta_imagen) 
-                          FROM imagenes_propiedades 
-                          WHERE id_propiedad = p.id) as imagenes
-                         FROM propiedades p 
-                         WHERE p.id = ?";
-
+                        (SELECT GROUP_CONCAT(CONCAT(id, ':', ruta_imagen)) 
+                         FROM imagenes_propiedades 
+                         WHERE id_propiedad = p.id) as imagenes_data
+                        FROM propiedades p 
+                        WHERE p.id = ?";
+                
                 $stmt = $db->prepare($query);
                 $stmt->bind_param("i", $id);
                 $stmt->execute();
                 $resultado = $stmt->get_result();
                 $propiedad = $resultado->fetch_assoc();
-
+                
                 if ($propiedad) {
-                    // Si hay imágenes, convertirlas en array
-                    if ($propiedad['imagenes']) {
-                        $imagenes = explode(',', $propiedad['imagenes']);
-                        $propiedad['imagenes'] = array_map(function ($ruta) {
-                            return ['ruta_imagen' => $ruta];
-                        }, $imagenes);
+                    // Procesar las imágenes para incluir sus IDs
+                    if ($propiedad['imagenes_data']) {
+                        $imagenes_array = explode(',', $propiedad['imagenes_data']);
+                        $propiedad['imagenes'] = array_map(function($img) {
+                            list($id, $ruta) = explode(':', $img);
+                            return [
+                                'id' => $id,
+                                'ruta_imagen' => $ruta
+                            ];
+                        }, $imagenes_array);
                     } else {
                         $propiedad['imagenes'] = [];
                     }
-
+                    unset($propiedad['imagenes_data']); // Limpiamos el campo temporal
+                    
                     sendJsonResponse(true, 'Propiedad encontrada', $propiedad);
                 } else {
                     sendJsonResponse(false, 'Propiedad no encontrada');
