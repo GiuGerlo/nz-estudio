@@ -52,48 +52,33 @@ function convertToWebP($source, $destination, $quality = 80) {
 
 // Si es una petición POST, procesar el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Manejar la eliminación de imagen individual
-    if(isset($_POST['action']) && $_POST['action'] === 'eliminar_imagen') {
+    // Obtener el contenido raw del POST para solicitudes JSON
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (isset($input['action']) && $input['action'] === 'update_order') {
         try {
-            $imagen_id = (int)$_POST['imagen_id'];
-            
-            // Verificar que no sea la última imagen
-            $stmt = $db->prepare("SELECT ip.*, p.id as propiedad_id, tp.nombre_categoria 
-                                FROM imagenes_propiedades ip 
-                                INNER JOIN propiedades p ON ip.id_propiedad = p.id 
-                                INNER JOIN tipos_propiedad tp ON p.categoria = tp.id 
-                                WHERE ip.id = ?");
-            $stmt->bind_param("i", $imagen_id);
-            $stmt->execute();
-            $imagen = $stmt->get_result()->fetch_assoc();
-            
-            if($imagen) {
-                // Verificar cantidad de imágenes
-                $count = $db->query("SELECT COUNT(*) as total FROM imagenes_propiedades WHERE id_propiedad = {$imagen['propiedad_id']}")->fetch_assoc()['total'];
-                
-                if($count <= 1) {
-                    sendJsonResponse(false, 'Debe mantener al menos una imagen');
-                    exit;
-                }
-                
-                // Eliminar archivo físico
-                if(file_exists("../../" . $imagen['ruta_imagen'])) {
-                    unlink("../../" . $imagen['ruta_imagen']);
-                }
-                
-                // Eliminar registro de la base de datos
-                $stmt = $db->prepare("DELETE FROM imagenes_propiedades WHERE id = ?");
-                $stmt->bind_param("i", $imagen_id);
-                
-                if($stmt->execute()) {
-                    sendJsonResponse(true, 'Imagen eliminada correctamente');
-                } else {
-                    sendJsonResponse(false, 'Error al eliminar la imagen de la base de datos');
-                }
-            } else {
-                sendJsonResponse(false, 'Imagen no encontrada');
+            if (!isset($input['orden']) || !is_array($input['orden'])) {
+                throw new Exception('Datos de orden inválidos');
             }
-        } catch(Exception $e) {
+
+            $db->begin_transaction();
+
+            foreach ($input['orden'] as $item) {
+                $id = (int)$item['id'];
+                $orden = (int)$item['orden'];
+                
+                $stmt = $db->prepare("UPDATE propiedades SET orden = ? WHERE id = ?");
+                $stmt->bind_param("ii", $orden, $id);
+                
+                if (!$stmt->execute()) {
+                    throw new Exception('Error al actualizar el orden');
+                }
+            }
+
+            $db->commit();
+            sendJsonResponse(true, 'Orden actualizado correctamente');
+        } catch (Exception $e) {
+            $db->rollback();
             sendJsonResponse(false, 'Error: ' . $e->getMessage());
         }
         exit;

@@ -22,9 +22,14 @@ $resultado = $db->query($query);
                 <p class="text-muted mb-0">Administra tus propiedades aquí</p>
             </div>
         </div>
-        <button type="button" class="btn btn-custom-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPropiedad">
-            <i class="fas fa-plus-circle me-2"></i>Nueva Propiedad
-        </button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-custom-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPropiedad">
+                <i class="fas fa-plus-circle me-2"></i>Nueva Propiedad
+            </button>
+            <button type="button" class="btn btn-outline-primary shadow-sm" onclick="location.href='order-propiedades.php'">
+                <i class="fas fa-sort me-2"></i>Ordenar
+            </button>
+        </div>
     </div>
 
     <!-- Tabla mejorada -->
