@@ -4,6 +4,9 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
+# Regla para propiedades (sin barra y números)
+RewriteRule ^propiedad([0-9]+)$ propiedad.php?id=$1 [QSA,L]
+
 # Redirigir rutas amigables a index.php?seccion=nombre
 RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?seccion=$1 [QSA,L]
 

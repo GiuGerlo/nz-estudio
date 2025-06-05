@@ -379,7 +379,7 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
                                         </div>
                                     <?php endif; ?>
 
-                                    <a href="propiedad.php?id=<?php echo $related['id']; ?>" class="btn-contact">
+                                    <a href="propiedad<?php echo $related['id']; ?>" class="btn-contact">
                                         Ver detalles <i class="bi bi-arrow-right"></i>
                                     </a>
                                 </div>

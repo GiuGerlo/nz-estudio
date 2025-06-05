@@ -126,7 +126,7 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
                                         </div>
 
                                         <div class="property-footer">
-                                            <a href="propiedad/<?php echo $propiedad['id']; ?>" class="btn-view-property">
+                                            <a href="propiedad<?php echo $propiedad['id']; ?>" class="btn-view-property">
                                                 Ver más <i class="bi bi-arrow-right"></i>
                                             </a>
                                         </div>
