@@ -8,6 +8,7 @@ $query = "SELECT p.*, tp.nombre_categoria,
          (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id LIMIT 1) as imagen_principal
          FROM propiedades p 
          LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id 
+         WHERE vendida = 0
          ORDER BY p.id DESC";
 $resultado = $db->query($query);
 ?>

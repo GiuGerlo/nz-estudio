@@ -18,7 +18,8 @@ function sendJsonResponse($success, $message, $data = null)
     exit;
 }
 
-function convertToWebP($source, $destination, $quality = 80) {
+function convertToWebP($source, $destination, $quality = 80)
+{
     $info = getimagesize($source);
     $isValid = true;
 
@@ -54,7 +55,7 @@ function convertToWebP($source, $destination, $quality = 80) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener el contenido raw del POST para solicitudes JSON
     $input = json_decode(file_get_contents('php://input'), true);
-    
+
     if (isset($input['action']) && $input['action'] === 'update_order') {
         try {
             if (!isset($input['orden']) || !is_array($input['orden'])) {
@@ -66,10 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($input['orden'] as $item) {
                 $id = (int)$item['id'];
                 $orden = (int)$item['orden'];
-                
+
                 $stmt = $db->prepare("UPDATE propiedades SET orden = ? WHERE id = ?");
                 $stmt->bind_param("ii", $orden, $id);
-                
+
                 if (!$stmt->execute()) {
                     throw new Exception('Error al actualizar el orden');
                 }
@@ -158,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $filename = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9.]/', '_', $_FILES['imagenes']['name'][$key]);
                         $webp_filename = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
                         $uploadFile = $base_dir . '/' . $webp_filename;
-                        
+
                         if (convertToWebP($tmp_name, $uploadFile)) {
                             $ruta_imagen = 'uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id . '/' . $webp_filename;
                             $db->query("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen) 
@@ -172,7 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             sendJsonResponse(false, 'Error al guardar la propiedad');
         }
-
     } catch (Exception $e) {
         sendJsonResponse(false, 'Error: ' . $e->getMessage());
     }
@@ -186,26 +186,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         case 'obtener':
             if (isset($_GET['id'])) {
                 $id = (int)$_GET['id'];
-                
-                // Modificar la consulta para obtener los datos completos de las imágenes
+
+                // Obtener los datos de la propiedad incluyendo la categoría
                 $query = "SELECT p.*, 
+                        tp.nombre_categoria,
                         (SELECT GROUP_CONCAT(CONCAT(id, ':', ruta_imagen)) 
                          FROM imagenes_propiedades 
                          WHERE id_propiedad = p.id) as imagenes_data
                         FROM propiedades p 
+                        LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id
                         WHERE p.id = ?";
-                
+
                 $stmt = $db->prepare($query);
                 $stmt->bind_param("i", $id);
                 $stmt->execute();
                 $resultado = $stmt->get_result();
                 $propiedad = $resultado->fetch_assoc();
-                
+
                 if ($propiedad) {
                     // Procesar las imágenes para incluir sus IDs
                     if ($propiedad['imagenes_data']) {
                         $imagenes_array = explode(',', $propiedad['imagenes_data']);
-                        $propiedad['imagenes'] = array_map(function($img) {
+                        $propiedad['imagenes'] = array_map(function ($img) {
                             list($id, $ruta) = explode(':', $img);
                             return [
                                 'id' => $id,
@@ -216,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         $propiedad['imagenes'] = [];
                     }
                     unset($propiedad['imagenes_data']); // Limpiamos el campo temporal
-                    
+
                     sendJsonResponse(true, 'Propiedad encontrada', $propiedad);
                 } else {
                     sendJsonResponse(false, 'Propiedad no encontrada');
@@ -263,44 +265,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($_GET['id'])) {
                 $id = (int)$_GET['id'];
 
-                // Obtener datos de la propiedad
-                $query = "SELECT * FROM propiedades WHERE id = ?";
-                $stmt = $db->prepare($query);
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
-                $propiedad = $stmt->get_result()->fetch_assoc();
+                try {
+                    // Iniciar transacción
+                    $db->begin_transaction();
 
-                if ($propiedad) {
-                    // Insertar en propiedades_vendidas
-                    $query = "INSERT INTO propiedades_vendidas 
-                             (id, categoria, titulo, localidad, ubicacion, servicios, caracteristicas, mapa) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    // Actualizar el campo 'vendida' a 1
+                    $query = "UPDATE propiedades SET vendida = 1 WHERE id = ?";
                     $stmt = $db->prepare($query);
-                    $stmt->bind_param(
-                        "iissssss",
-                        $propiedad['id'],
-                        $propiedad['categoria'],
-                        $propiedad['titulo'],
-                        $propiedad['localidad'],
-                        $propiedad['ubicacion'],
-                        $propiedad['servicios'],
-                        $propiedad['caracteristicas'],
-                        $propiedad['mapa']
-                    );
+                    $stmt->bind_param("i", $id);
 
                     if ($stmt->execute()) {
-                        // Eliminar de propiedades activas
-                        $db->query("DELETE FROM propiedades WHERE id = $id");
+                        $db->commit();
                         $_SESSION['alert'] = [
                             'type' => 'success',
                             'message' => 'Propiedad marcada como vendida correctamente'
                         ];
                     } else {
-                        $_SESSION['alert'] = [
-                            'type' => 'error',
-                            'message' => 'Error al marcar la propiedad como vendida'
-                        ];
+                        throw new Exception('Error al actualizar el estado de la propiedad');
                     }
+                } catch (Exception $e) {
+                    $db->rollback();
+                    $_SESSION['alert'] = [
+                        'type' => 'error',
+                        'message' => 'Error al marcar la propiedad como vendida: ' . $e->getMessage()
+                    ];
                 }
             }
             break;

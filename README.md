@@ -17,6 +17,8 @@ Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, dise
 - **Equipo**: Perfiles profesionales del equipo
 - **Contacto**: Formulario de contacto y ubicación con Google Maps
 - **Login**: Sistema de autenticación para administradores
+- **Gestión de Propiedades**: Panel completo para administrar propiedades inmobiliarias
+- **Ordenamiento Personalizado**: Interfaz de arrastrar y soltar para ordenar propiedades por categoría
 
 ### 📱 Diseño Responsivo
 - Adaptable a todos los dispositivos (móviles, tablets, escritorio)
@@ -101,10 +103,69 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS tipos_propiedad (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_categoria VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS propiedades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    categoria INT NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    localidad VARCHAR(100) NOT NULL,
+    ubicacion TEXT,
+    tamanio VARCHAR(50),
+    servicios TEXT,
+    caracteristicas TEXT,
+    mapa TEXT,
+    orden INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (categoria) REFERENCES tipos_propiedad(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS imagenes_propiedades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_propiedad INT NOT NULL,
+    ruta_imagen VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_propiedad) REFERENCES propiedades(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Insertar usuario de prueba (contraseña: password)
 INSERT INTO users (email, password) 
 VALUES ('admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 ```
+
+## 🏠 Gestión de Propiedades
+
+El sistema ahora incluye un completo módulo de gestión de propiedades inmobiliarias con las siguientes características:
+
+### Panel de Administración
+- Listado de propiedades con vista previa de imágenes
+- Búsqueda y filtrado de propiedades
+- Paginación y ordenamiento
+- Vista de propiedades por categoría
+
+### Gestión de Propiedades
+- Creación y edición de propiedades
+- Asignación de categorías
+- Gestión de imágenes (múltiples por propiedad)
+- Conversión automática a WebP para optimización
+- Vista previa en tiempo real
+
+### Ordenamiento Personalizado
+- Interfaz de arrastrar y soltar
+- Ordenamiento por categorías
+- Actualización en tiempo real sin recargar la página
+- Feedback visual durante el proceso
+
+### Características Técnicas
+- Carga optimizada de imágenes
+- Interfaz responsiva
+- Validación de formularios
+- Manejo de errores
+- Notificaciones de estado
 
 ## 🔒 Seguridad
 

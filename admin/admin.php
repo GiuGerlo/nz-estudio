@@ -3,7 +3,6 @@ require_once '../config/config.php';
 
 // Obtener estadísticas para el dashboard
 $totalPropiedades = $db->query("SELECT COUNT(*) as total FROM propiedades")->fetch_assoc()['total'];
-$totalPropiedadesVendidas = $db->query("SELECT COUNT(*) as total FROM propiedades_vendidas")->fetch_assoc()['total'];
 $totalCategorias = $db->query("SELECT COUNT(*) as total FROM tipos_propiedad")->fetch_assoc()['total'];
 $totalImagenes = $db->query("SELECT COUNT(*) as total FROM imagenes_propiedades")->fetch_assoc()['total'];
 
@@ -29,13 +28,6 @@ include_once 'includes/head.php';
                         <i class="fas fa-building text-muted"></i>
                         <div class="stat-number"><?php echo $totalPropiedades; ?></div>
                         <div class="stat-label">Propiedades Activas</div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
-                    <div class="card stat-card card-accent-green">
-                        <i class="fas fa-check-circle text-muted"></i>
-                        <div class="stat-number"><?php echo $totalPropiedadesVendidas; ?></div>
-                        <div class="stat-label">Propiedades Vendidas</div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
