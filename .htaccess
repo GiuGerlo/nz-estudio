@@ -9,3 +9,8 @@ RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?seccion=$1 [QSA,L]
 
 # Redirigir la raíz a /inicio
 RewriteRule ^$ index.php?seccion=inicio [QSA,L]
+
+<IfModule mod_headers.c>
+    Header set X-Frame-Options "ALLOW-FROM https://www.google.com"
+    Header set Content-Security-Policy "frame-src 'self' https://www.google.com https://*.google.com"
+</IfModule>
