@@ -45,7 +45,7 @@
                     <li><a href="alquiler">Alquiler</a></li>
                     <li class="dropdown"><a href="#"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
-                            <li><a href="#">Propiedades</a></li>
+                            <li><a href="propiedades.php">Propiedades</a></li>
                             <li><a href="#">Terrenos</a></li>
                             <li><a href="#">Locales</a></li>
                             <li><a href="#">Ventas</a></li>

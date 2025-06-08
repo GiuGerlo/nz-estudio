@@ -81,10 +81,6 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
 
                 <div class="category-section" id="<?php echo strtolower($categoria['nombre_categoria']); ?>">
                     <div class="category-header" data-aos="fade-up">
-                        <span class="category-badge">
-                            <i class="bi bi-tag-fill"></i>
-                            <?php echo htmlspecialchars($categoria['nombre_categoria']); ?>
-                        </span>
                         <h2 class="category-title"><?php echo htmlspecialchars($categoria['nombre_categoria']); ?></h2>
                     </div>
 

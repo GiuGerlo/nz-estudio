@@ -14,7 +14,7 @@
                 <p class="hero-subtitle mb-5">Te ayudamos a hacer realidad tus sueños inmobiliarios con asesoramiento profesional y personalizado.</p>
 
                 <div class="hero-cta d-flex flex-wrap gap-3">
-                    <a href="#propiedades" class="btn btn-primary btn-lg px-4">
+                    <a href="propiedades.php" class="btn btn-primary btn-lg px-4">
                         <i class="bi bi-house-door me-2"></i>Ver Propiedades
                     </a>
                     <a href="#contacto" class="btn btn-outline-light btn-lg px-4">

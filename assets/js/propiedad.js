@@ -1,4 +1,4 @@
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
         // Manejo de thumbnails del carrusel
         const thumbnails = document.querySelectorAll('.thumbnail-item');
         const carousel = document.querySelector('#propertyCarousel');
@@ -140,3 +140,44 @@
             carousel.prev();
         }
     }
+
+    // Ajuste dinámico de object-fit según tamaño de imagen
+    document.addEventListener('DOMContentLoaded', function() {
+        function setObjectFit(img) {
+            // Usar Math.round para evitar problemas de decimales
+            const w = Math.round(img.naturalWidth);
+            const h = Math.round(img.naturalHeight);
+            if (w >= 1024 && h >= 768) {
+                img.style.objectFit = 'cover';
+            } else {
+                img.style.objectFit = 'contain';
+            }
+        }
+        // Carrusel principal
+        document.querySelectorAll('.carousel-item img').forEach(function(img) {
+            img.addEventListener('load', function() {
+                setObjectFit(img);
+            });
+            if (img.complete) {
+                setObjectFit(img);
+            }
+        });
+        // Thumbnails
+        document.querySelectorAll('.thumbnail-item img').forEach(function(img) {
+            img.addEventListener('load', function() {
+                setObjectFit(img);
+            });
+            if (img.complete) {
+                setObjectFit(img);
+            }
+        });
+        // Imagen única (cuando solo hay una)
+        document.querySelectorAll('.main-carousel img').forEach(function(img) {
+            img.addEventListener('load', function() {
+                setObjectFit(img);
+            });
+            if (img.complete) {
+                setObjectFit(img);
+            }
+        });
+    });

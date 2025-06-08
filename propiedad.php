@@ -154,7 +154,7 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
                             <div class="main-carousel">
                                 <img src="<?php echo htmlspecialchars($imagenes[0]['ruta_imagen']); ?>"
                                     alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>"
-                                    style="width: 100%; height: 500px; object-fit: cover;">
+                                    style="width: 100%; height: 500px; object-fit: contain; background: #fff;">
                             </div>
                         <?php endif; ?>
                     </div>
@@ -164,7 +164,7 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
                         <div class="main-carousel">
                             <img src="assets/img/no-image.jpg"
                                 alt="Sin imagen disponible"
-                                style="width: 100%; height: 500px; object-fit: cover;">
+                                style="width: 100%; height: 500px; object-fit: contain; background: #fff;">
                         </div>
                     </div>
                 <?php endif; ?>
@@ -364,6 +364,7 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
                             <div class="related-card">
                                 <div class="related-image">
                                     <?php if ($related['imagen_principal']): ?>
+                                        <img src="<?php echo htmlspecialchars($related['imagen_principal']); ?>" alt="<?php echo htmlspecialchars($related['titulo']); ?>">
                                     <?php else: ?>
                                         <img src="assets/img/no-image.jpg" alt="Sin imagen">
                                     <?php endif; ?>

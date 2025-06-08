@@ -126,8 +126,7 @@ include_once 'includes/head.php';
                                                 <td><?php echo htmlspecialchars($propiedad['titulo']); ?></td>
                                                 <td><?php echo htmlspecialchars($propiedad['localidad']); ?></td>
                                                 <td>
-                                                    <a href="editar_propiedad.php?id=<?php echo $propiedad['id']; ?>" class="btn btn-sm btn-custom-blue"><i class="fas fa-edit"></i></a>
-                                                    <a href="ver_propiedad.php?id=<?php echo $propiedad['id']; ?>" class="btn btn-sm btn-custom-blue"><i class="fas fa-eye"></i></a>
+                                                    <a href="../propiedad<?php echo $propiedad['id']; ?>" class="btn btn-sm btn-custom-blue" target="_blank"><i class="fas fa-eye"></i></a>
                                                 </td>
                                             </tr>
                                         <?php endwhile; ?>
