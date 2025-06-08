@@ -93,98 +93,56 @@ El sitio incluye un sistema de autenticación seguro para el panel de administra
 - **Usuario**: admin@example.com
 - **Contraseña**: password
 
-### Estructura de la base de datos:
 
-```sql
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+## Personalización
 
-CREATE TABLE IF NOT EXISTS tipos_propiedad (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_categoria VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+### Estilos
 
-CREATE TABLE IF NOT EXISTS propiedades (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    categoria INT NOT NULL,
-    titulo VARCHAR(255) NOT NULL,
-    localidad VARCHAR(100) NOT NULL,
-    ubicacion TEXT,
-    tamanio VARCHAR(50),
-    servicios TEXT,
-    caracteristicas TEXT,
-    mapa TEXT,
-    orden INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (categoria) REFERENCES tipos_propiedad(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+- **Archivos principales**:
+  - `assets/css/style.css`: Estilos generales
+  - `assets/css/propiedades.css`: Estilos específicos para listados
+  - `assets/css/responsive.css`: Media queries para diseño adaptativo
 
-CREATE TABLE IF NOT EXISTS imagenes_propiedades (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_propiedad INT NOT NULL,
-    ruta_imagen VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_propiedad) REFERENCES propiedades(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+### JavaScript
 
--- Insertar usuario de prueba (contraseña: password)
-INSERT INTO users (email, password) 
-VALUES ('admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
-```
+- **Archivos principales**:
+  - `assets/js/main.js`: Funcionalidades generales
+  - `assets/js/filtros.js`: Filtrado y ordenamiento de propiedades
+  - `assets/js/lightbox.js`: Galería de imágenes
 
-## 🏠 Gestión de Propiedades
+## Seguridad
 
-El sistema ahora incluye un completo módulo de gestión de propiedades inmobiliarias con las siguientes características:
+- **Protección contra inyección SQL**: Uso de consultas preparadas PDO
+- **Validación de entrada**: Filtrado de datos de usuario
+- **Protección XSS**: Escapado de salida
+- **Seguridad de sesiones**: Configuración segura de cookies
+- **Headers de seguridad**: Configurados en `.htaccess`
 
-### Panel de Administración
-- Listado de propiedades con vista previa de imágenes
-- Búsqueda y filtrado de propiedades
-- Paginación y ordenamiento
-- Vista de propiedades por categoría
+## Diseño Responsive
 
-### Gestión de Propiedades
-- Creación y edición de propiedades
-- Asignación de categorías
-- Gestión de imágenes (múltiples por propiedad)
-- Conversión automática a WebP para optimización
-- Vista previa en tiempo real
+- **Mobile First**: Diseño pensado primero para móviles
+- **Breakpoints**:
+  - Móvil: < 768px
+  - Tablet: 768px - 991px
+  - Escritorio: ≥ 992px
+- **Imágenes adaptativas**: Uso de `srcset` para diferentes resoluciones
 
-### Ordenamiento Personalizado
-- Interfaz de arrastrar y soltar
-- Ordenamiento por categorías
-- Actualización en tiempo real sin recargar la página
-- Feedback visual durante el proceso
+## Optimización
 
-### Características Técnicas
-- Carga optimizada de imágenes
-- Interfaz responsiva
-- Validación de formularios
-- Manejo de errores
-- Notificaciones de estado
+- **Caché**: Headers de caché apropiados
+- **Minificación**: CSS y JS minificados en producción
+- **Optimización de imágenes**: Compresión automática
+- **Lazy loading**: Para imágenes fuera del viewport
 
-## 🔒 Seguridad
+## SEO
 
-Se han implementado las siguientes medidas de seguridad:
+- **URLs amigables**: Estructura clara y legible
+- **Meta etiquetas**: Títulos y descripciones únicas
+- **Datos estructurados**: Schema.org para propiedades inmobiliarias
+- **Sitemap.xml**: Generación automática
+- **robots.txt**: Configuración para motores de búsqueda
 
-- **Protección contra inyección SQL**: Uso de consultas preparadas
-- **Hash de contraseñas**: Uso de `password_hash()` para almacenar contraseñas de forma segura
-- **Validación de entrada**: Filtrado y validación de todos los datos de entrada
-- **Manejo de sesiones seguras**: Configuración adecuada de las cookies de sesión
-- **Protección CSRF**: Implementada en los formularios críticos
-
-## 🎯 Objetivos del Proyecto
-
-- **Profesionalismo**: Presentar una imagen corporativa seria y confiable
-- **Accesibilidad**: Garantizar que el sitio sea accesible para todos los usuarios
-- **Rendimiento**: Optimizar los tiempos de carga y la experiencia de usuario
-- **Conversión**: Facilitar el contacto con clientes potenciales
-
-## 📞 Contacto
+## Contacto
 
 - **Estudio Jurídico NZ**  
   📍 Catamarca 227, Guatimozín, Córdoba  
