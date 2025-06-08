@@ -38,6 +38,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Activar filtro por hash en la URL (ej: #cat-3)
+    function activarFiltroPorHash() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#cat-')) {
+            const catId = hash.replace('#cat-', '');
+            const btn = document.querySelector('.filter-btn[data-filter="' + catId + '"]');
+            if (btn) btn.click();
+        } else {
+            // Si no hay hash o no es válido, mostrar todas
+            const btn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (btn) btn.click();
+        }
+    }
+
+    activarFiltroPorHash();
+
+    // Opcional: si el usuario cambia el hash manualmente
+    window.addEventListener('hashchange', activarFiltroPorHash);
+
     // Lazy loading para imágenes
     const images = document.querySelectorAll('.property-image img');
     const imageObserver = new IntersectionObserver((entries, observer) => {

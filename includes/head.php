@@ -46,10 +46,12 @@
                     <li class="dropdown"><a href="#"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
                             <li><a href="propiedades.php">Propiedades</a></li>
-                            <li><a href="#">Terrenos</a></li>
-                            <li><a href="#">Locales</a></li>
-                            <li><a href="#">Ventas</a></li>
-                            <li><a href="#">Departamento</a></li>
+                            <li><a href="propiedades.php#cat-1">Casas</a></li>
+                            <li><a href="propiedades.php#cat-5">Cocheras</a></li>
+                            <li><a href="propiedades.php#cat-6">Departamentos</a></li>
+                            <li><a href="propiedades.php#cat-3">Locales</a></li>
+                            <li><a href="propiedades.php#cat-4">Quintas</a></li>
+                            <li><a href="propiedades.php#cat-2">Terrenos</a></li>
                         </ul>
                     </li>
                     <li><a href="vendida">Vendida</a></li>
