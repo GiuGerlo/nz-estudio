@@ -32,112 +32,100 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
     </div>
 </section>
 
-<!-- Filtros Mejorados -->
-<section class="filters-section" id="filters-section">
+<!-- Filtros simples -->
+<div class="filters-container">
     <div class="container">
-        <div class="filters-container">
-            <div class="row justify-content-center">
-                <div class="col-12 col-md-10 col-lg-8">
-                    <div class="filters-scroll" id="filters-scroll">
-                        <button class="filter-btn active" data-filter="all">
-                            <i class="bi bi-house-door me-1"></i>
-                            Todas
-                        </button>
-                        <?php
-                        $categorias->data_seek(0);
-                        while ($cat = $categorias->fetch_assoc()):
-                            $count_query = "SELECT COUNT(*) as total FROM propiedades p WHERE p.categoria = " . $cat['id'] . " AND p.vendida = 0";
-                            $count_result = $db->query($count_query);
-                            $count = $count_result->fetch_assoc()['total'];
-                        ?>
-                            <button class="filter-btn" data-filter="<?php echo strtolower($cat['nombre_categoria']); ?>">
-                                <i class="bi bi-building me-1"></i>
-                                <?php echo htmlspecialchars($cat['nombre_categoria']); ?>
-                                <span class="filter-count"><?php echo $count; ?></span>
-                            </button>
-                        <?php endwhile; ?>
-                    </div>
-                </div>
-            </div>
+        <div class="filters-wrapper justify-content-center">
+            <button class="filter-btn active" data-filter="all">
+                <i class="bi bi-grid"></i> Todas
+            </button>
+            <?php
+            $categorias->data_seek(0);
+            while ($cat = $categorias->fetch_assoc()):
+            ?>
+                <button class="filter-btn" data-filter="<?php echo $cat['id']; ?>" 
+                        data-category-name="<?php echo htmlspecialchars($cat['nombre_categoria']); ?>">
+                    <i class="bi bi-house"></i>
+                    <?php echo htmlspecialchars($cat['nombre_categoria']); ?>
+                </button>
+            <?php endwhile; ?>
         </div>
     </div>
-</section>
+</div>
 
-<!-- Sección de Propiedades -->
-<section class="properties-section">
-    <div class="container">
+<!-- Contenedor de propiedades y mensaje sin resultados -->
+<div class="container">
+    <div class="no-results-message text-center" style="display: none;">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Por el momento no hay <span class="category-name"></span> disponibles
+        </div>
+    </div>
+    
+    <!-- Contenedor de todas las categorías -->
+    <div class="categories-container">
         <?php
-        // Resetear el puntero de categorías
         $categorias->data_seek(0);
-
-        // Por cada categoría
         while ($categoria = $categorias->fetch_assoc()):
-            // Obtener propiedades de esta categoría
             $query = $base_query . " AND p.categoria = " . $categoria['id'] . " ORDER BY p.orden ASC, p.id DESC";
             $propiedades = $db->query($query);
-
             if ($propiedades->num_rows > 0):
         ?>
-
-                <div class="category-section" id="<?php echo strtolower($categoria['nombre_categoria']); ?>">
-                    <div class="category-header" data-aos="fade-up">
-                        <h2 class="category-title"><?php echo htmlspecialchars($categoria['nombre_categoria']); ?></h2>
-                    </div>
-
-                    <div class="row">
-                        <?php while ($propiedad = $propiedades->fetch_assoc()): ?>
-                            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
-                                <div class="property-card">
-                                    <div class="property-image">
-                                        <?php if ($propiedad['imagen_principal']): ?>
-                                            <img src="<?php echo $propiedad['imagen_principal']; ?>"
-                                                alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>">
-                                        <?php else: ?>
-                                            <img src="assets/img/no-image.jpg" alt="Sin imagen">
+            <div class="category-section" data-category="<?php echo $categoria['id']; ?>">
+                <div class="category-header">
+                    <h2 class="category-title"><?php echo htmlspecialchars($categoria['nombre_categoria']); ?></h2>
+                </div>
+                <div class="properties-grid">
+                    <?php while ($propiedad = $propiedades->fetch_assoc()): ?>
+                        <div class="property-item">
+                            <div class="property-card">
+                                <div class="property-image">
+                                    <?php if ($propiedad['imagen_principal']): ?>
+                                        <img src="<?php echo $propiedad['imagen_principal']; ?>"
+                                            alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>">
+                                    <?php else: ?>
+                                        <img src="assets/img/no-image.jpg" alt="Sin imagen">
+                                    <?php endif; ?>
+                                </div>
+                                <div class="property-content">
+                                    <h3 class="property-title"><?php echo htmlspecialchars($propiedad['titulo']); ?></h3>
+                                    <div class="property-info">
+                                        <?php if ($propiedad['localidad']): ?>
+                                            <div class="info-item">
+                                                <i class="bi bi-geo-alt"></i>
+                                                <span><?php echo htmlspecialchars($propiedad['localidad']); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($propiedad['ubicacion']): ?>
+                                            <div class="info-item">
+                                                <i class="bi bi-map"></i>
+                                                <span><?php echo htmlspecialchars($propiedad['ubicacion']); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($propiedad['tamanio']): ?>
+                                            <div class="info-item">
+                                                <i class="bi bi-rulers"></i>
+                                                <span><?php echo htmlspecialchars($propiedad['tamanio']); ?></span>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
-                                    <div class="property-content">
-                                        <h3 class="property-title"><?php echo htmlspecialchars($propiedad['titulo']); ?></h3>
-                                        <div class="property-info">
-                                            <?php if ($propiedad['localidad']): ?>
-                                                <div class="info-item">
-                                                    <i class="bi bi-geo-alt"></i>
-                                                    <span><?php echo htmlspecialchars($propiedad['localidad']); ?></span>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <?php if ($propiedad['ubicacion']): ?>
-                                                <div class="info-item">
-                                                    <i class="bi bi-map"></i>
-                                                    <span><?php echo htmlspecialchars($propiedad['ubicacion']); ?></span>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <?php if ($propiedad['tamanio']): ?>
-                                                <div class="info-item">
-                                                    <i class="bi bi-rulers"></i>
-                                                    <span><?php echo htmlspecialchars($propiedad['tamanio']); ?></span>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <div class="property-footer">
-                                            <a href="propiedad<?php echo $propiedad['id']; ?>" class="btn-view-property">
-                                                Ver más <i class="bi bi-arrow-right"></i>
-                                            </a>
-                                        </div>
+                                    <div class="property-footer">
+                                        <a href="propiedad<?php echo $propiedad['id']; ?>" class="btn-view-property">
+                                            Ver más <i class="bi bi-arrow-right"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        <?php endwhile; ?>
-                    </div>
+                        </div>
+                    <?php endwhile; ?>
                 </div>
-        <?php
+            </div>
+        <?php 
             endif;
-        endwhile;
+        endwhile; 
         ?>
     </div>
-</section>
+</div>
 
 <!-- Sección CTA -->
 <section class="cta-section">
