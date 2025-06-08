@@ -73,4 +73,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     images.forEach(img => imageObserver.observe(img));
+
+    // Ocultar barra de filtros al hacer scroll hacia abajo, mostrar al subir
+    let lastScrollTop = 0;
+    const filtersContainer = document.querySelector('.filters-container');
+    let ticking = false;
+
+    function handleScroll() {
+        if (!filtersContainer) return;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            // Scroll hacia abajo
+            filtersContainer.style.transform = 'translateY(-120%)';
+            filtersContainer.style.transition = 'transform 0.3s';
+        } else {
+            // Scroll hacia arriba
+            filtersContainer.style.transform = 'translateY(0)';
+            filtersContainer.style.transition = 'transform 0.3s';
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            window.requestAnimationFrame(handleScroll);
+            ticking = true;
+        }
+    });
 });

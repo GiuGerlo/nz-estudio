@@ -20,10 +20,11 @@
                 <div class="col-lg-2 col-md-6">
                     <h5 class="mb-3">Enlaces Rápidos</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="index.php" class="text-decoration-none text-dark">Inicio</a></li>
-                        <li class="mb-2"><a href="#servicios" class="text-decoration-none text-dark">Servicios</a></li>
-                        <li class="mb-2"><a href="#about" class="text-decoration-none text-dark">Nosotros</a></li>
-                        <li class="mb-2"><a href="contacto.php" class="text-decoration-none text-dark">Contacto</a></li>
+                        <li class="mb-2"><a href="inicio" class="text-decoration-none text-dark">Inicio</a></li>
+                        <li class="mb-2"><a href="inicio#about" class="text-decoration-none text-dark">Nosotros</a></li>
+                        <li class="mb-2"><a href="inicio#servicios" class="text-decoration-none text-dark">Servicios</a></li>
+                        <li class="mb-2"><a href="propiedades.php" class="text-decoration-none text-dark">Venta</a></li>
+                        <li class="mb-2"><a href="inicio#contacto" class="text-decoration-none text-dark">Contacto</a></li>
                     </ul>
                 </div>
 
@@ -58,7 +59,7 @@
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <p class="mb-0">
-                        Desarrollado por 
+                        Desarrollado por
                         <a href="https://artisansthinking.com/" target="_blank" class="text-decoration-none">
                             <img src="assets/img/Logo_Artisans.webp" alt="Artisans Thinking" class="footer-logo ms-2" style="height: 24px; vertical-align: middle;">
                         </a>
@@ -81,7 +82,7 @@
 
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <!-- AOS Animation -->
     <script>
         AOS.init({

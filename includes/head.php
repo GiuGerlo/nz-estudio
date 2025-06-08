@@ -42,10 +42,10 @@
             <nav id="navmenu" class="navmenu">
                 <ul>
                     <li><a href="inicio" class="active">Inicio</a></li>
-                    <li><a href="alquiler">Alquiler</a></li>
+                    <li><a href="#" id="alquiler-link">Alquiler</a></li>
                     <li class="dropdown"><a href="#"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
-                            <li><a href="propiedades.php">Propiedades</a></li>
+                            <li><a href="propiedades.php">Todas</a></li>
                             <li><a href="propiedades.php#cat-1">Casas</a></li>
                             <li><a href="propiedades.php#cat-5">Cocheras</a></li>
                             <li><a href="propiedades.php#cat-6">Departamentos</a></li>
@@ -54,7 +54,7 @@
                             <li><a href="propiedades.php#cat-2">Terrenos</a></li>
                         </ul>
                     </li>
-                    <li><a href="vendida">Vendida</a></li>
+                    <li><a href="vendidas">Vendida</a></li>
                     <li><a href="inicio#contacto">Contacto</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -64,3 +64,22 @@
     </header>
 
     <main class="main">
+
+        <!-- SweetAlert2 -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var alquilerLink = document.getElementById('alquiler-link');
+            if (alquilerLink) {
+                alquilerLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'info',
+                        title: '¡Próximamente!',
+                        text: 'Todavía no están disponibles los alquileres.',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Entendido'
+                    });
+                });
+            }
+        });
+        </script>

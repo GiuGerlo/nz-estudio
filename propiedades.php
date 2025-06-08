@@ -127,26 +127,9 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
     </div>
 </div>
 
-<!-- Sección CTA -->
-<section class="cta-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h3 data-aos="fade-up">¿No encontraste lo que buscabas?</h3>
-                <p data-aos="fade-up" data-aos-delay="100">
-                    Contáctanos y te ayudaremos a encontrar la propiedad perfecta para ti.
-                    Tenemos una amplia base de datos con más opciones disponibles.
-                </p>
-                <div class="mt-4" data-aos="fade-up" data-aos-delay="200">
-                    <a href="inicio#contacto" class="btn btn-light me-3">Contactar ahora</a>
-                    <a href="https://wa.me/5493468525227" class="btn" style="background: white; color: var(--accent-color);">
-                        <i class="bi bi-whatsapp me-2"></i>WhatsApp
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<!-- CONTACTO -->
+
+<?php include_once 'templates/contact-me.php'; ?>
 
 <script src="assets/js/propiedades.js"></script>
 

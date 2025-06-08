@@ -13,7 +13,7 @@
         <div class="row g-4 justify-content-center">
             <!-- Alquileres -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="100">
-                <a href="#alquileres" class="service-btn">
+                <a href="#" class="service-btn" id="alquileres-btn">
                     <div class="service-btn-inner">
                         <i class="bi bi-house-door"></i>
                         <span>Alquileres</span>
@@ -23,7 +23,7 @@
 
             <!-- Casas -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="150">
-                <a href="#casas" class="service-btn">
+                <a href="propiedades.php#cat-1" class="service-btn">
                     <div class="service-btn-inner">
                         <i class="bi bi-house"></i>
                         <span>Casas</span>
@@ -31,19 +31,29 @@
                 </a>
             </div>
 
-            <!-- Terrenos -->
-            <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="200">
-                <a href="#terrenos" class="service-btn">
+            <!-- Cocheras -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="175">
+                <a href="propiedades.php#cat-5" class="service-btn">
                     <div class="service-btn-inner">
-                        <i class="bi bi-tree"></i>
-                        <span>Terrenos</span>
+                        <i class="bi bi-car-front"></i>
+                        <span>Cocheras</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Departamentos -->
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="200">
+                <a href="propiedades.php#cat-6" class="service-btn">
+                    <div class="service-btn-inner">
+                        <i class="bi bi-building"></i>
+                        <span>Departamentos</span>
                     </div>
                 </a>
             </div>
 
             <!-- Locales -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="250">
-                <a href="#locales" class="service-btn">
+                <a href="propiedades.php#cat-3" class="service-btn">
                     <div class="service-btn-inner">
                         <i class="bi bi-shop"></i>
                         <span>Locales</span>
@@ -53,7 +63,7 @@
 
             <!-- Quintas -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="300">
-                <a href="#quintas" class="service-btn">
+                <a href="propiedades.php#cat-4" class="service-btn">
                     <div class="service-btn-inner">
                         <i class="bi bi-flower1"></i>
                         <span>Quintas</span>
@@ -61,12 +71,12 @@
                 </a>
             </div>
 
-            <!-- Departamentos -->
+            <!-- Terrenos -->
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="fade-up" data-aos-delay="350">
-                <a href="#departamentos" class="service-btn">
+                <a href="propiedades.php#cat-2" class="service-btn">
                     <div class="service-btn-inner">
-                        <i class="bi bi-building"></i>
-                        <span>Departamentos</span>
+                        <i class="bi bi-tree"></i>
+                        <span>Terrenos</span>
                     </div>
                 </a>
             </div>
@@ -74,3 +84,21 @@
     </div>
 </section>
 <!-- /Services Section -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var alquilerBtn = document.getElementById('alquileres-btn');
+    if (alquilerBtn) {
+        alquilerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'info',
+                title: '¡Próximamente!',
+                text: 'Todavía no están disponibles los alquileres.',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Entendido'
+            });
+        });
+    }
+});
+</script>

@@ -57,11 +57,6 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <?php if ($propiedad['vendida']): ?>
-                    <div class="status-badge vendida">VENDIDA</div>
-                <?php else: ?>
-                    <div class="status-badge">DISPONIBLE</div>
-                <?php endif; ?>
 
                 <h1 class="property-title">
                     <?php echo htmlspecialchars($propiedad['titulo']); ?>
@@ -85,6 +80,11 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
                             <i class="bi bi-camera"></i>
                             <span><?php echo count($imagenes); ?> foto<?php echo count($imagenes) > 1 ? 's' : ''; ?></span>
                         </div>
+                    <?php endif; ?>
+                    <?php if ($propiedad['vendida']): ?>
+                        <div class="status-badge vendida">VENDIDA</div>
+                    <?php else: ?>
+                        <div class="status-badge">DISPONIBLE</div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -278,7 +278,7 @@ $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
                             Ubicación
                         </h3>
                         <div class="responsive-map">
-                            <?php 
+                            <?php
                             $mapa_limpio = str_replace('\&quot;', '"', $propiedad['mapa']);
                             echo html_entity_decode(stripslashes($mapa_limpio));
                             ?>
