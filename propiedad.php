@@ -1,8 +1,7 @@
 <?php
 require_once 'config/config.php';
-include_once 'includes/head.php';
 
-// Obtener el ID de la propiedad
+// Obtener el ID y datos de la propiedad primero
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
@@ -48,6 +47,15 @@ $related_stmt->bind_param("ii", $propiedad['categoria'], $id);
 $related_stmt->execute();
 $related_result = $related_stmt->get_result();
 $propiedades_relacionadas = $related_result->fetch_all(MYSQLI_ASSOC);
+
+// Configurar SEO específico para esta propiedad
+$page_title = $propiedad['titulo'];
+$page_description = "Propiedad en " . $propiedad['localidad'] . ". " . 
+                   ($propiedad['tamanio'] ? $propiedad['tamanio'] . ". " : "") . 
+                   "Ubicada en " . $propiedad['ubicacion'];
+$page_image = $propiedad['imagen_principal'] ?? "assets/img/logo.png";
+
+include_once 'includes/head.php';
 ?>
 
 <link rel="stylesheet" href="assets/css/propiedad.css">

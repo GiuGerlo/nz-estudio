@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+    <?php include_once 'head-meta.php'; ?>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Estudio Jurídico-Inmobiliario Nadina Zaranich</title>

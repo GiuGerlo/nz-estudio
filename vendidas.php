@@ -1,4 +1,8 @@
 <?php
+$page_title = "Propiedades Vendidas - Historial de Ventas";
+$page_description = "Explora nuestro historial de propiedades vendidas en Guatimozín y alrededores. Referencias de nuestro trabajo y trayectoria en el mercado inmobiliario.";
+$page_image = "assets/img/logo.png";
+
 require_once 'config/config.php';
 include_once 'includes/head.php';
 

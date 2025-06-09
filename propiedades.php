@@ -1,4 +1,8 @@
 <?php
+$page_title = "Propiedades en Venta - Guatimozín y Zona";
+$page_description = "Descubre nuestra amplia selección de propiedades en venta en Guatimozín y alrededores. Casas, terrenos, locales comerciales y más. Encuentra tu próxima propiedad con nosotros.";
+$page_image = "assets/img/logo.png";
+
 require_once 'config/config.php';
 include_once 'includes/head.php';
 
