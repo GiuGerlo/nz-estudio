@@ -409,3 +409,144 @@
     transition: none;
   }
 }
+
+/* Estilos para el buscador avanzado */
+.advanced-search {
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px;
+  padding-left: 45px;
+  border: 2px solid #e9ecef;
+  border-radius: 25px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(95, 134, 151, 0.1);
+  background: white;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.2rem;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  display: none;
+}
+
+.search-results.active {
+  display: block;
+  animation: fadeInDown 0.3s ease;
+}
+
+.search-result-item {
+  padding: 12px 20px;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: #f8f9fa;
+}
+
+.search-result-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.search-result-content {
+  flex: 1;
+}
+
+.search-result-title {
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-bottom: 3px;
+}
+
+.search-result-category {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.no-results-found {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .advanced-search {
+    padding: 15px;
+  }
+  
+  .search-input {
+    font-size: 0.95rem;
+    padding: 10px 15px;
+    padding-left: 40px;
+  }
+  
+  .search-icon {
+    font-size: 1.1rem;
+  }
+  
+  .search-result-item {
+    padding: 10px 15px;
+  }
+  
+  .search-result-image {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -57,6 +57,17 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
     </div>
 </div>
 
+<!-- Buscador avanzado -->
+<div class="advanced-search">
+    <div class="container">
+        <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar propiedades" id="propertySearch">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+</div>
+
 <!-- Contenedor de propiedades y mensaje sin resultados -->
 <div class="container">
     <div class="no-results-message text-center" style="display: none;">

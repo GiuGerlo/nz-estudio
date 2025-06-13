@@ -101,4 +101,113 @@ document.addEventListener('DOMContentLoaded', function() {
             ticking = true;
         }
     });
+
+    // Funcionalidad del buscador avanzado
+    const searchInput = document.getElementById('propertySearch');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+
+    // Función para normalizar texto (eliminar acentos)
+    function normalizeText(text) {
+        return text.normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .toLowerCase();
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const searchTerm = normalizeText(this.value.trim());
+            
+            if (searchTerm.length < 2) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                // Obtener todas las propiedades
+                const propertyCards = document.querySelectorAll('.property-card');
+                let results = [];
+
+                propertyCards.forEach(card => {
+                    const title = normalizeText(card.querySelector('.property-title').textContent);
+                    const location = normalizeText(card.querySelector('.info-item span')?.textContent || '');
+                    const category = normalizeText(card.closest('.category-section').querySelector('.category-title').textContent);
+                    
+                    if (title.includes(searchTerm) || location.includes(searchTerm) || category.includes(searchTerm)) {
+                        const propertyId = card.querySelector('.btn-view-property').href.split('propiedad')[1];
+                        const image = card.querySelector('.property-image img').src;
+                        results.push({
+                            id: propertyId,
+                            title: card.querySelector('.property-title').textContent,
+                            category: card.closest('.category-section').querySelector('.category-title').textContent,
+                            image: image
+                        });
+                    }
+                });
+
+                // Mostrar resultados
+                if (results.length > 0) {
+                    searchResults.innerHTML = results.map(prop => `
+                        <div class="search-result-item" onclick="window.location.href='propiedad${prop.id}'">
+                            <img src="${prop.image}" alt="${prop.title}" class="search-result-image">
+                            <div class="search-result-content">
+                                <div class="search-result-title">${prop.title}</div>
+                                <div class="search-result-category">${prop.category}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    searchResults.innerHTML = `
+                        <div class="no-results-found">
+                            <i class="bi bi-search me-2"></i>
+                            No se encontraron propiedades que coincidan con tu búsqueda
+                        </div>
+                    `;
+                }
+
+                searchResults.classList.add('active');
+            }, 300);
+        });
+
+        // Cerrar resultados al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        // Manejar navegación con teclado
+        searchInput.addEventListener('keydown', function(e) {
+            const results = searchResults.querySelectorAll('.search-result-item');
+            const activeResult = searchResults.querySelector('.search-result-item:hover');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!activeResult) {
+                    results[0]?.classList.add('hover');
+                } else {
+                    const nextResult = activeResult.nextElementSibling;
+                    if (nextResult) {
+                        activeResult.classList.remove('hover');
+                        nextResult.classList.add('hover');
+                    }
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (activeResult) {
+                    const prevResult = activeResult.previousElementSibling;
+                    if (prevResult) {
+                        activeResult.classList.remove('hover');
+                        prevResult.classList.add('hover');
+                    }
+                }
+            } else if (e.key === 'Enter') {
+                const hoveredResult = searchResults.querySelector('.search-result-item.hover');
+                if (hoveredResult) {
+                    window.location.href = hoveredResult.onclick.toString().match(/propiedad\d+/)[0];
+                }
+            }
+        });
+    }
 });

@@ -155,7 +155,7 @@
                         <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
                                 onclick="eliminarImagen(${imagen.id})">
                             <i class="fas fa-times"></i>
-                        </button>
+                            </button>
                     </div>
                 `;
                 previewDiv.appendChild(col);
@@ -175,20 +175,20 @@
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: 'controllers/controller_propiedades.php',
-                        type: 'POST',
-                        data: {
-                            action: 'eliminar_imagen',
+            $.ajax({
+                url: 'controllers/controller_propiedades.php',
+                type: 'POST',
+                data: {
+                    action: 'eliminar_imagen',
                             id: id
-                        },
-                        success: function(response) {
-                            let data = typeof response === 'string' ? JSON.parse(response) : response;
+                },
+                success: function(response) {
+                    let data = typeof response === 'string' ? JSON.parse(response) : response;
                             if(data.success) {
                                 existingImages = existingImages.filter(img => img.id !== id);
                                 renderPreview();
                                 Swal.fire('¡Eliminado!', 'La imagen ha sido eliminada.', 'success');
-                            } else {
+                    } else {
                                 Swal.fire('Error', data.message || 'Error al eliminar la imagen', 'error');
                             }
                         }

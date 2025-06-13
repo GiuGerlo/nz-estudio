@@ -19,9 +19,10 @@ $resultado = $db->query($query);
 <script src="https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js"></script>
 
 <style>
-    .container {
-        max-width: 1400px;
-        padding: 20px;
+    .container-fluid, .container {
+        /* box-sizing: border-box;
+        overflow-x: hidden; */
+        width: 80%;
     }
 
     .title-map {
@@ -159,7 +160,7 @@ $resultado = $db->query($query);
     }
 </style>
 
-<div class="container">
+<div class="container-fluid">
     <h1 class="title-map">Mapa de Propiedades</h1>
     <div class="map-container">
         <div id="map"></div>
