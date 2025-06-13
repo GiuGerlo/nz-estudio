@@ -32,4 +32,7 @@ if ($db->connect_error) {
 
 // Evitar problemas con acentos y caracteres especiales
 $db->set_charset("utf8mb4");
+
+// Configuración de Google Maps
+define('GOOGLE_MAPS_API_KEY', 'AIzaSyAD4aOZDL-d6jLIq8_HfHdReWIrQEgMVBE');
 ?>

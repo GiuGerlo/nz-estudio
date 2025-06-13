@@ -1,8 +1,9 @@
 <?php
 require_once 'config/config.php';
 
-// Consulta para obtener todas las propiedades con coordenadas
-$query = "SELECT p.*, t.nombre_categoria 
+// Consulta para obtener todas las propiedades con coordenadas y su primera imagen
+$query = "SELECT p.*, t.nombre_categoria, 
+          (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY id ASC LIMIT 1) as imagen
           FROM propiedades p 
           LEFT JOIN tipos_propiedad t ON p.categoria = t.id 
           WHERE p.latitud IS NOT NULL AND p.longitud IS NOT NULL 
@@ -21,7 +22,7 @@ $resultado = $db->query($query);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Google Maps API y MarkerClusterer -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD4aOZDL-d6jLIq8_HfHdReWIrQEgMVBE"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=<?php echo GOOGLE_MAPS_API_KEY; ?>"></script>
     <script src="https://unpkg.com/@googlemaps/markerclusterer@2.4.0/dist/index.min.js"></script>
     
     <style>
@@ -85,10 +86,25 @@ $resultado = $db->query($query);
             text-decoration: none;
             width: 100%;
             text-align: center;
+            background-color: #5F8697 !important;
+            border-color: #5F8697 !important;
+        }
+        .property-link a:hover {
+            background-color: #4a6b7a !important;
+            border-color: #4a6b7a !important;
         }
         .info-window-content {
             max-width: 300px;
             padding: 5px;
+        }
+        .cluster {
+            background-color: #5F8697;
+            color: white;
+            border-radius: 50%;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
         @media (max-width: 768px) {
             .container {
@@ -119,7 +135,7 @@ $resultado = $db->query($query);
             
             // Crear el mapa
             const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 7, // Ajustado para mostrar mejor la región
+                zoom: 7,
                 center: center,
                 mapTypeControl: true,
                 streetViewControl: true,
@@ -158,6 +174,7 @@ $resultado = $db->query($query);
                 const contentString = `
                     <div class="info-window-content">
                         <div class="property-info">
+                            ${propiedad.imagen ? `<img src="${propiedad.imagen}" alt="${propiedad.titulo}">` : ''}
                             <div class="property-title">${propiedad.titulo}</div>
                             <div class="property-category">${propiedad.nombre_categoria}</div>
                             <div class="property-location">${propiedad.localidad}</div>
@@ -184,13 +201,41 @@ $resultado = $db->query($query);
                 bounds.extend(position);
             });
 
-            // Crear el clusterer con configuración básica
-            new markerclusterer.MarkerClusterer({
+            // Crear el clusterer con configuración mejorada
+            const markerClusterer = new markerclusterer.MarkerClusterer({
                 map,
                 markers,
                 algorithm: new markerclusterer.GridAlgorithm({
-                    gridSize: 60
-                })
+                    gridSize: 30,
+                    maxZoom: 13
+                }),
+                renderer: {
+                    render: ({ count, position }) => {
+                        return new google.maps.Marker({
+                            position,
+                            label: {
+                                text: String(count),
+                                color: "white",
+                                fontSize: "14px"
+                            },
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 20,
+                                fillColor: "#5F8697",
+                                fillOpacity: 0.9,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 2
+                            },
+                            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count
+                        });
+                    }
+                },
+                onClusterClick: (event, cluster, map) => {
+                    // Al hacer clic en un cluster, hacer zoom en esa área
+                    const bounds = new google.maps.LatLngBounds();
+                    cluster.markers.forEach(marker => bounds.extend(marker.position));
+                    map.fitBounds(bounds);
+                }
             });
 
             // Ajustar el zoom para mostrar todos los marcadores
