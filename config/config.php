@@ -17,9 +17,9 @@ if ($isLocal) {
 } else {
     // Configuración para entorno de producción
     $server = 'localhost';
-    $username = 'u692790713_alpaweb';
-    $database = 'u692790713_alpaweb';
-    $password = 'Ramcc202323@'; 
+    $username = 'u407412506_nzestudio';
+    $database = 'u407412506_nzestudio';
+    $password = '#Giuli45411498'; 
 }
 
 // Crear conexión con MySQL
