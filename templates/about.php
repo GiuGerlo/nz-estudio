@@ -31,7 +31,7 @@
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
                 <div class="about-content ps-lg-4">
                     <h3 class="mb-4">Nuestra Historia</h3>
-                    <p class="fst-italic mb-4">"El saber no ocupa lugar, y las oportunidades no ocurren, las creas."</p>
+                    <p class="fst-italic mb-4">"Las oportunidades no ocurren, las creas."</p>
                     
                     <div class="about-text mb-4">
                         <p>NZ <strong>ESTUDIO JURÍDICO-INMOBILIARIO</strong> nació en 2020, durante la pandemia que transformó al mundo. Fue en ese momento cuando decidí ampliar mis horizontes profesionales estudiando para convertirme en Martillera, Corredora Pública y Corredora Inmobiliaria en la prestigiosa Universidad Blas Pascal de Córdoba.</p>

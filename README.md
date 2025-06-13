@@ -9,7 +9,7 @@
 </div>
 
 ## 📋 Descripción
-Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, desarrollado por [Artisans Thinking](https://artisanthinking.com). Plataforma diseñada para ofrecer una experiencia de usuario óptima y facilitar la gestión de propiedades inmobiliarias.
+Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, desarrollado por [Artisans Thinking](https://artisansthinking.com). Plataforma diseñada para ofrecer una experiencia de usuario óptima y facilitar la gestión de propiedades inmobiliarias.
 
 ## ✨ Características Principales
 

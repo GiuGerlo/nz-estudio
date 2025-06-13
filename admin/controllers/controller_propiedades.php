@@ -94,17 +94,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tamanio = $db->real_escape_string($_POST['tamanio']);
         $servicios = $db->real_escape_string($_POST['servicios']);
         $caracteristicas = $db->real_escape_string($_POST['caracteristicas']);
-        $mapa = $db->real_escape_string($_POST['mapa']);
+        $mapa = $_POST['mapa'];
+        $latitud = isset($_POST['latitud']) ? $db->real_escape_string($_POST['latitud']) : null;
+        $longitud = isset($_POST['longitud']) ? $db->real_escape_string($_POST['longitud']) : null;
 
         if ($id) {
             // Actualizar propiedad existente
             $query = "UPDATE propiedades SET 
                      categoria = ?, titulo = ?, localidad = ?, ubicacion = ?,
-                     tamanio = ?, servicios = ?, caracteristicas = ?, mapa = ?
+                     tamanio = ?, servicios = ?, caracteristicas = ?, mapa = ?,
+                     latitud = ?, longitud = ?
                      WHERE id = ?";
             $stmt = $db->prepare($query);
             $stmt->bind_param(
-                "isssssssi",
+                "isssssssssi",
                 $categoria,
                 $titulo,
                 $localidad,
@@ -113,16 +116,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $servicios,
                 $caracteristicas,
                 $mapa,
+                $latitud,
+                $longitud,
                 $id
             );
         } else {
             // Insertar nueva propiedad
             $query = "INSERT INTO propiedades 
-                     (categoria, titulo, localidad, ubicacion, tamanio, servicios, caracteristicas, mapa)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                     (categoria, titulo, localidad, ubicacion, tamanio, servicios, caracteristicas, mapa, latitud, longitud)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $db->prepare($query);
             $stmt->bind_param(
-                "isssssss",
+                "isssssssss",
                 $categoria,
                 $titulo,
                 $localidad,
@@ -130,7 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tamanio,
                 $servicios,
                 $caracteristicas,
-                $mapa
+                $mapa,
+                $latitud,
+                $longitud
             );
         }
 

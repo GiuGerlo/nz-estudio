@@ -79,6 +79,24 @@
                     <div class="card card-accent-green mb-4">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-3 text-muted"><i class="fas fa-map-marked-alt me-2"></i>Ubicación en Mapa</h6>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="latitud" name="latitud" placeholder="Latitud">
+                                        <label for="latitud"><i class="fas fa-map-marker-alt me-2"></i>Latitud</label>
+                                        <small class="text-muted">Ejemplo: -32.8768202575293</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="longitud" name="longitud" placeholder="Longitud">
+                                        <label for="longitud"><i class="fas fa-map-marker-alt me-2"></i>Longitud</label>
+                                        <small class="text-muted">Ejemplo: -61.026038894990506</small>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-floating">
                                 <textarea class="form-control" id="mapa" name="mapa" style="height: 120px"></textarea>
                                 <label for="mapa">iframe de Google Maps</label>
@@ -125,64 +143,29 @@
             renderPreview();
         }
 
-        // Renderiza solo las imágenes existentes (de la base de datos)
+        // Función para renderizar el preview
         function renderPreview() {
-            let previewHtml = '';
+            previewDiv.innerHTML = '';
             existingImages.forEach((imagen, index) => {
-                previewHtml += `
-                <div class="col-md-3" id="imagen-${index}">
-                    <div class="card">
-                        <img src="../${imagen.ruta_imagen}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                        <div class="card-body p-2">
-                            <button type="button" class="btn btn-danger btn-sm w-100" 
-                                    onclick="confirmarEliminarImagen(${imagen.id}, ${index})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            previewDiv.innerHTML = previewHtml;
-        }
-
-        // Manejar nuevas imágenes seleccionadas (solo agrega previews de nuevas imágenes)
-        document.getElementById('imagenes').addEventListener('change', function(e) {
-            // Primero renderiza las imágenes existentes
-            renderPreview();
-            // Luego agrega las nuevas imágenes seleccionadas
-            for (let file of this.files) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'col-md-3';
-                    div.innerHTML = `
-                    <div class="card">
-                        <img src="${e.target.result}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                        <div class="card-body p-2">
-                            <span class="badge bg-info w-100">Nueva imagen</span>
-                        </div>
+                const col = document.createElement('div');
+                col.className = 'col-md-3';
+                col.innerHTML = `
+                    <div class="position-relative">
+                        <img src="../${imagen.ruta_imagen}" class="img-thumbnail" alt="Preview">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
+                                onclick="eliminarImagen(${imagen.id})">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 `;
-                    previewDiv.appendChild(div);
-                }
-                reader.readAsDataURL(file);
-            }
-        });
+                previewDiv.appendChild(col);
+            });
+        }
 
-        // Exponer funciones necesarias globalmente
-        window.actualizarPreviewImagenes = actualizarPreview;
-        window.confirmarEliminarImagen = function(idImagen, indexImagen) {
-            const totalImagenes = document.querySelectorAll('#preview-imagenes .col-md-3').length;
-            if (totalImagenes <= 1) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Debe mantener al menos una imagen'
-                });
-                return;
-            }
+        // Función para eliminar imagen existente
+        window.eliminarImagen = function(id) {
             Swal.fire({
-                title: '¿Eliminar imagen?',
+                title: '¿Estás seguro?',
                 text: "Esta acción no se puede deshacer",
                 icon: 'warning',
                 showCancelButton: true,
@@ -192,48 +175,57 @@
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    eliminarImagen(idImagen, indexImagen);
-                }
-            });
-        }
-
-        function eliminarImagen(idImagen, indexImagen) {
-            $.ajax({
-                url: 'controllers/controller_propiedades.php',
-                type: 'POST',
-                data: {
-                    action: 'eliminar_imagen',
-                    imagen_id: idImagen
-                },
-                success: function(response) {
-                    let data = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (data.success) {
-                        document.getElementById(`imagen-${indexImagen}`).remove();
-                        // También eliminar del array de imágenes existentes
-                        existingImages.splice(indexImagen, 1);
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Éxito!',
-                            text: data.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message
-                        });
-                    }
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al comunicarse con el servidor'
+                    $.ajax({
+                        url: 'controllers/controller_propiedades.php',
+                        type: 'POST',
+                        data: {
+                            action: 'eliminar_imagen',
+                            id: id
+                        },
+                        success: function(response) {
+                            let data = typeof response === 'string' ? JSON.parse(response) : response;
+                            if(data.success) {
+                                existingImages = existingImages.filter(img => img.id !== id);
+                                renderPreview();
+                                Swal.fire('¡Eliminado!', 'La imagen ha sido eliminada.', 'success');
+                            } else {
+                                Swal.fire('Error', data.message || 'Error al eliminar la imagen', 'error');
+                            }
+                        }
                     });
                 }
             });
-        }
+        };
+
+        // Preview de nuevas imágenes
+        document.getElementById('imagenes').addEventListener('change', function(e) {
+            const files = e.target.files;
+            previewDiv.innerHTML = '';
+
+            for(let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if(file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3';
+
+                    reader.onload = function(e) {
+                        col.innerHTML = `
+                            <div class="position-relative">
+                                <img src="${e.target.result}" class="img-thumbnail" alt="Preview">
+                            </div>
+                        `;
+                    };
+
+                    reader.readAsDataURL(file);
+                    previewDiv.appendChild(col);
+                }
+            }
+        });
+
+        // Función global para actualizar el preview de imágenes
+        window.actualizarPreviewImagenes = function(imagenes) {
+            actualizarPreview(imagenes);
+        };
     });
 </script>

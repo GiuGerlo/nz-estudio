@@ -332,6 +332,8 @@ $resultado = $db->query($query);
                     $('#servicios').val(data.data.servicios);
                     $('#caracteristicas').val(data.data.caracteristicas);
                     $('#mapa').val(data.data.mapa);
+                    $('#latitud').val(data.data.latitud);
+                    $('#longitud').val(data.data.longitud);
                     
                     // Usar la función global para actualizar el preview
                     if(data.data.imagenes) {

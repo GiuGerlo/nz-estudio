@@ -42,9 +42,9 @@
 
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="inicio" class="active">Inicio</a></li>
-                    <li><a href="#" id="alquiler-link">Alquiler</a></li>
-                    <li class="dropdown"><a href="#"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                    <li><a href="inicio" class="active" style="text-decoration: none;">Inicio</a></li>
+                    <li><a href="#" id="alquiler-link" style="text-decoration: none;">Alquiler</a></li>
+                    <li class="dropdown"><a href="#" style="text-decoration: none;"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>
                             <li><a href="propiedades.php">Todas</a></li>
                             <li><a href="propiedades.php#cat-1">Casas</a></li>
@@ -55,8 +55,8 @@
                             <li><a href="propiedades.php#cat-2">Terrenos</a></li>
                         </ul>
                     </li>
-                    <li><a href="vendidas">Vendida</a></li>
-                    <li><a href="inicio#contacto">Contacto</a></li>
+                    <li><a href="vendidas" style="text-decoration: none;">Vendida</a></li>
+                    <li><a href="inicio#contacto" style="text-decoration: none;">Contacto</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>

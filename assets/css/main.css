@@ -14,7 +14,7 @@
   --background-color: #e9eaed; /* Background color for the entire website, including individual sections */
   --default-color: #000; /* Default color used for the majority of the text content across the entire website */
   --heading-color: #061D37; /* Color for headings, subheadings and title throughout the website */
-  --accent-color:  #0A305C; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+  --accent-color:  #5F8697; /* Accent color that represents your brand zon the website. It's used for buttons, links, and other elements that need to stand out */
   --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
   --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
   --color7: #FCF2CB;
@@ -364,6 +364,7 @@ h6 {
     font-size: 15px;
     text-transform: none;
     color: var(--color7);
+    text-decoration: none !important;
   }
 
   .navmenu .dropdown ul a i {
@@ -1114,6 +1115,8 @@ section,
   margin-bottom: 20px;
   line-height: 1.8;
   color: var(--default-color);
+  text-align: justify;
+  align-content: center;
 }
 
 .feature-box {
