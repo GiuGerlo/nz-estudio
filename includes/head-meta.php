@@ -16,6 +16,18 @@ $description = isset($page_description) ? $page_description : $site_description;
 <!-- SEO Básico -->
 <title><?= htmlspecialchars($title) ?></title>
 <meta name="description" content="<?= htmlspecialchars($description) ?>">
+<?php
+require_once __DIR__ . '/../config/config.php';
+if(defined('GOOGLE_ANALYTICS_ID') && GOOGLE_ANALYTICS_ID): ?>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=<?= GOOGLE_ANALYTICS_ID ?>"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '<?= GOOGLE_ANALYTICS_ID ?>');
+</script>
+<?php endif; ?>
 <meta name="keywords" content="inmobiliaria guatimozin, propiedades cordoba, casas en venta, terrenos, locales comerciales, asesoramiento juridico inmobiliario">
 <link rel="canonical" href="<?= $current_url ?>">
 

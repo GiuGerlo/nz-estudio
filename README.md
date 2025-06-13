@@ -138,6 +138,14 @@ Las contribuciones son bienvenidas. Por favor, lee las [pautas de contribución]
 
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más información.
 
+## 🆕 Novedades recientes (junio 2025)
+
+- **Buscador avanzado instantáneo**: Ahora puedes buscar propiedades por título, localidad o categoría, con resultados en tiempo real y sin distinción de acentos. Totalmente responsivo y accesible.
+- **Mapa dinámico de propiedades**: Mapa interactivo con clusters personalizados, adaptado a dispositivos móviles y escritorio, sin barras de desplazamiento ni errores de responsive.
+- **Integración de Google Analytics 4**: Medición profesional de visitas y eventos, con el ID centralizado en `config/config.php` y el script insertado automáticamente en el `<head>`.
+- **Mejoras de accesibilidad y UX**: Navegación por teclado en el buscador, mensajes claros, animaciones suaves y feedback visual.
+- **Correcciones de responsive**: Ajustes en el CSS y estructura para eliminar barras de desplazamiento y mejorar la experiencia en móviles.
+
 ---
 <div align="center">
   <p>Desarrollado con ❤️ por <a href="https://artisanthinking.com">Artisans Thinking</a></p>
