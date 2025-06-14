@@ -39,14 +39,3 @@ define('GOOGLE_MAPS_API_KEY', 'AIzaSyAD4aOZDL-d6jLIq8_HfHdReWIrQEgMVBE');
 // Google Analytics
 define('GOOGLE_ANALYTICS_ID', 'G-0CG4DEM9KS');
 ?>
-
-<!-- Google Analytics 4 -->
-<?php if(defined('GOOGLE_ANALYTICS_ID') && GOOGLE_ANALYTICS_ID): ?>
-<script async src="https://www.googletagmanager.com/gtag/js?id=<?= GOOGLE_ANALYTICS_ID ?>"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', '<?= GOOGLE_ANALYTICS_ID ?>');
-</script>
-<?php endif; ?>

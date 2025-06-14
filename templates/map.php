@@ -21,9 +21,13 @@ $resultado = $db->query($query);
 <style>
     .container-fluid,
     .container {
-        /* box-sizing: border-box;
-        overflow-x: hidden; */
-        width: 80%;
+        width: 85%;
+    }
+
+    .container-map {
+        padding: 12px;
+        margin: 0 auto;
+        max-width: 1200px;
     }
 
     .title-map {
@@ -38,7 +42,7 @@ $resultado = $db->query($query);
         background: white;
         border-radius: 10px;
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        padding: 20px;
+        padding: 10px;
         margin-bottom: 30px;
     }
 
@@ -167,7 +171,7 @@ $resultado = $db->query($query);
     }
 </style>
 </div>
-<div class="container-fluid">
+<div class="container-map">
     <h1 class="title-map">Mapa de Propiedades</h1>
     <div class="map-container">
         <div id="map"></div>
