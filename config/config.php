@@ -4,22 +4,22 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 
+require_once __DIR__ . '/env.php';
+
 // Detectar entorno (local o producción)
-$isLocal = in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1']) || 
-           (function_exists('str_contains') && str_contains($_SERVER['HTTP_HOST'], 'local'));
+$isLocal = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']) ||
+           (function_exists('str_contains') && str_contains($_SERVER['HTTP_HOST'] ?? '', 'local'));
 
 if ($isLocal) {
-    // Configuración para entorno local
-    $server = 'localhost:3307';
-    $username = 'root';
-    $password = '';
-    $database = 'nz-estudio';
+    $server   = env('DB_LOCAL_HOST', 'localhost:3307');
+    $username = env('DB_LOCAL_USER', 'root');
+    $password = env('DB_LOCAL_PASS', '');
+    $database = env('DB_LOCAL_NAME', 'nz-estudio');
 } else {
-    // Configuración para entorno de producción
-    $server = 'localhost';
-    $username = 'u407412506_nzestudio';
-    $database = 'u407412506_nzestudio';
-    $password = '#Giuli45411498'; 
+    $server   = env('DB_PROD_HOST');
+    $username = env('DB_PROD_USER');
+    $password = env('DB_PROD_PASS');
+    $database = env('DB_PROD_NAME');
 }
 
 // Crear conexión con MySQL
@@ -33,9 +33,6 @@ if ($db->connect_error) {
 // Evitar problemas con acentos y caracteres especiales
 $db->set_charset("utf8mb4");
 
-// Configuración de Google Maps
-define('GOOGLE_MAPS_API_KEY', 'AIzaSyAD4aOZDL-d6jLIq8_HfHdReWIrQEgMVBE');
-
-// Google Analytics
-define('GOOGLE_ANALYTICS_ID', 'G-0CG4DEM9KS');
-?>
+// Constantes de servicios externos
+define('GOOGLE_MAPS_API_KEY', env('GOOGLE_MAPS_API_KEY', ''));
+define('GOOGLE_ANALYTICS_ID', env('GOOGLE_ANALYTICS_ID', ''));

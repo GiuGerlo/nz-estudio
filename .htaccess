@@ -1,5 +1,10 @@
 RewriteEngine On
 
+# Bloquear acceso a archivos sensibles
+<FilesMatch "^\.env|\.env\..*|composer\.(json|lock)|\.gitignore|\.git">
+    Require all denied
+</FilesMatch>
+
 # Si la petición es un archivo real o directorio, no hacer nada
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

@@ -1,2 +1,6 @@
 nz-estudio.sql
+*.sql
 uploads/
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\laragon\\\\www\\\\nz-estudio\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Select-Object Name, Mode)"
+    ]
+  }
+}
