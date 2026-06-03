@@ -31,11 +31,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Agregar host a known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
       - name: Ejecutar deploy (modo sequential)
         env:
           SSH_HOST:    ${{ secrets.SSH_HOST }}
