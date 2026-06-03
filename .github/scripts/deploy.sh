@@ -42,9 +42,33 @@ DEPLOYIGNORE="${DEPLOYIGNORE:-.deployignore}"
 SUMMARY="${GITHUB_STEP_SUMMARY:-/dev/stdout}"
 BACKUP_DIR_REMOTE="$DEPLOY_PATH/../backups"
 SHA_FILE_REMOTE="$DEPLOY_PATH/.deployed_sha"
+START_TS=$(date +%s)
+
+# Contadores globales para el resumen final
+TOTAL_ADDED=0
+TOTAL_MODIFIED=0
+TOTAL_DELETED=0
+TOTAL_BACKUPS=0
+TOTAL_COMMITS_OK=0
 
 # Resolver TO_SHA si vino como referencia simbólica
 TO_SHA=$(git rev-parse "$TO_SHA")
+
+# ──────────────────────────────────────────────────────────────────────
+# ETAPA 1/5: Configuración (visible en console log)
+# ──────────────────────────────────────────────────────────────────────
+echo "═══════════════════════════════════════════════════════════════"
+echo "🚀 DEPLOY A PRODUCCIÓN — nz-estudio"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+echo "📋 ETAPA 1/5: Configuración"
+echo "   ├─ 📍 Servidor:    $SSH_USER@$SSH_HOST:$SSH_PORT"
+echo "   ├─ 📁 Path:        $DEPLOY_PATH"
+echo "   ├─ 💾 Backups dir: $BACKUP_DIR_REMOTE"
+echo "   ├─ ⚙️  Modo:        $MODE"
+echo "   ├─ 🎯 SHA destino: ${TO_SHA:0:7}"
+echo "   └─ 🔄 Update SHA:  $UPDATE_SHA"
+echo ""
 
 # ──────────────────────────────────────────────────────────────────────
 # Helpers SSH/SCP
@@ -121,13 +145,18 @@ do_backup() {
     local label="$1"   # ej: "INITIAL" o sha corto
     local ts; ts=$(date +%Y%m%d_%H%M%S)
     local backup_name="${ts}_${label}.tar.gz"
-    echo "💾 Backup: $backup_name"
-    ssh_run "mkdir -p '$BACKUP_DIR_REMOTE' && \
+    echo "   ├─ 💾 Backup: $backup_name"
+    if ssh_run "mkdir -p '$BACKUP_DIR_REMOTE' && \
              tar --exclude='uploads' --exclude='backups' --exclude='_backups' \
                  -czf '$BACKUP_DIR_REMOTE/$backup_name' \
                  -C '$DEPLOY_PATH' . 2>/dev/null && \
-             ls -1t '$BACKUP_DIR_REMOTE'/*.tar.gz | tail -n +6 | xargs -r rm --"
-    LAST_BACKUP="$backup_name"
+             ls -1t '$BACKUP_DIR_REMOTE'/*.tar.gz | tail -n +6 | xargs -r rm --"; then
+        LAST_BACKUP="$backup_name"
+        TOTAL_BACKUPS=$((TOTAL_BACKUPS + 1))
+    else
+        echo "   ⚠️  Backup falló (continúa el deploy igual)"
+        LAST_BACKUP="(falló)"
+    fi
 }
 
 # ──────────────────────────────────────────────────────────────────────
@@ -135,49 +164,117 @@ do_backup() {
 # ──────────────────────────────────────────────────────────────────────
 write_commit_report() {
     local sha="$1" added_file="$2" modified_file="$3" deleted_file="$4"
+    local commit_num="$5" commit_total="$6"
     local sha7="${sha:0:7}"
     local subject; subject=$(git log -1 --format=%s "$sha")
+    local author; author=$(git log -1 --format='%an' "$sha")
     local n_a n_m n_d total
     n_a=$(wc -l < "$added_file" | tr -d ' ')
     n_m=$(wc -l < "$modified_file" | tr -d ' ')
     n_d=$(wc -l < "$deleted_file" | tr -d ' ')
     total=$(( n_a + n_m + n_d ))
 
+    # Console output (legible en log de Actions)
+    echo "   ├─ 📊 Cambios: $n_a nuevos · $n_m modificados · $n_d eliminados ($total total)"
+    echo "   ├─ ⬆️  Subiendo cambios al servidor..."
+
+    # Markdown summary (persistente en UI de Actions)
     {
         echo ""
-        echo "### Commit \`$sha7\` — $subject"
+        echo "---"
         echo ""
-        echo "**📊 $total archivos: $n_a nuevos · $n_m modificados · $n_d eliminados**"
+        echo "### 📌 Commit $commit_num/$commit_total · \`$sha7\` — $subject"
+        echo ""
+        echo "**Autor:** $author"
+        echo ""
+        echo "| Tipo | Cantidad |"
+        echo "|---|---:|"
+        echo "| ➕ Nuevos | $n_a |"
+        echo "| ✏️ Modificados | $n_m |"
+        echo "| 🗑️ Eliminados | $n_d |"
+        echo "| **📦 Total** | **$total** |"
+        echo ""
+        echo "**💾 Backup:** \`$LAST_BACKUP\`"
+        echo ""
 
-        if [ "$n_a" -gt 0 ]; then
+        if [ "$total" -gt 0 ]; then
+            echo "<details><summary>📂 Ver lista de archivos</summary>"
             echo ""
-            echo "#### ➕ Nuevos ($n_a)"
-            sed 's/^/- `/; s/$/`/' "$added_file"
-        fi
-        if [ "$n_m" -gt 0 ]; then
-            echo ""
-            echo "#### ✏️ Modificados ($n_m)"
-            sed 's/^/- `/; s/$/`/' "$modified_file"
-        fi
-        if [ "$n_d" -gt 0 ]; then
-            echo ""
-            echo "#### 🗑️ Eliminados ($n_d)"
-            sed 's/^/- `/; s/$/`/' "$deleted_file"
-        fi
-        if [ -n "${LAST_BACKUP:-}" ]; then
-            echo ""
-            echo "💾 Backup: \`$LAST_BACKUP\`"
+            if [ "$n_a" -gt 0 ]; then
+                echo "**➕ Nuevos ($n_a):**"
+                echo ""
+                awk '{printf "%d. `%s`\n", NR, $0}' "$added_file"
+                echo ""
+            fi
+            if [ "$n_m" -gt 0 ]; then
+                echo "**✏️ Modificados ($n_m):**"
+                echo ""
+                awk '{printf "%d. `%s`\n", NR, $0}' "$modified_file"
+                echo ""
+            fi
+            if [ "$n_d" -gt 0 ]; then
+                echo "**🗑️ Eliminados ($n_d):**"
+                echo ""
+                awk '{printf "%d. `%s`\n", NR, $0}' "$deleted_file"
+                echo ""
+            fi
+            echo "</details>"
         fi
     } >> "$SUMMARY"
+
+    # Actualizar contadores globales
+    TOTAL_ADDED=$((TOTAL_ADDED + n_a))
+    TOTAL_MODIFIED=$((TOTAL_MODIFIED + n_m))
+    TOTAL_DELETED=$((TOTAL_DELETED + n_d))
 }
 
 write_header() {
     {
-        echo "## 🚀 Deploy a producción"
+        echo "# 🚀 Deploy a producción — nz-estudio"
         echo ""
-        echo "**Modo:** \`$MODE\`"
-        echo "**Rango:** \`${FROM_SHA:-auto}\` → \`${TO_SHA:0:7}\`"
-        echo "**Update SHA:** \`$UPDATE_SHA\`"
+        echo "| Campo | Valor |"
+        echo "|---|---|"
+        echo "| **🖥️ Servidor** | \`$SSH_HOST:$SSH_PORT\` |"
+        echo "| **📁 Path** | \`$DEPLOY_PATH\` |"
+        echo "| **⚙️ Modo** | \`$MODE\` |"
+        echo "| **🎯 SHA destino** | \`${TO_SHA:0:7}\` |"
+        echo "| **🔄 Update SHA** | \`$UPDATE_SHA\` |"
+    } >> "$SUMMARY"
+}
+
+write_final_summary() {
+    local end_ts; end_ts=$(date +%s)
+    local duration=$((end_ts - START_TS))
+    local total_files=$((TOTAL_ADDED + TOTAL_MODIFIED + TOTAL_DELETED))
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "📋 ETAPA 5/5: Resumen final"
+    echo "═══════════════════════════════════════════════════════════════"
+    echo "   ├─ ✅ Commits aplicados:   $TOTAL_COMMITS_OK"
+    echo "   ├─ 📦 Archivos totales:    $total_files"
+    echo "   │   ├─ ➕ Nuevos:           $TOTAL_ADDED"
+    echo "   │   ├─ ✏️  Modificados:     $TOTAL_MODIFIED"
+    echo "   │   └─ 🗑️  Eliminados:      $TOTAL_DELETED"
+    echo "   ├─ 💾 Backups creados:     $TOTAL_BACKUPS"
+    echo "   └─ ⏱️  Duración total:      ${duration}s"
+    echo "═══════════════════════════════════════════════════════════════"
+
+    {
+        echo ""
+        echo "---"
+        echo ""
+        echo "## ✅ Resumen final"
+        echo ""
+        echo "| Métrica | Valor |"
+        echo "|---|---:|"
+        echo "| 🟢 Commits aplicados | $TOTAL_COMMITS_OK |"
+        echo "| 📦 Archivos totales | **$total_files** |"
+        echo "| ➕ Nuevos | $TOTAL_ADDED |"
+        echo "| ✏️ Modificados | $TOTAL_MODIFIED |"
+        echo "| 🗑️ Eliminados | $TOTAL_DELETED |"
+        echo "| 💾 Backups creados | $TOTAL_BACKUPS |"
+        echo "| ⏱️ Duración | ${duration}s |"
     } >> "$SUMMARY"
 }
 
@@ -202,6 +299,7 @@ write_remote_sha() {
 # ──────────────────────────────────────────────────────────────────────
 deploy_range() {
     local prev_sha="$1" target_sha="$2" label="$3"
+    local commit_num="${4:-1}" commit_total="${5:-1}"
 
     do_backup "$label"
 
@@ -228,10 +326,14 @@ deploy_range() {
     total=$(( $(wc -l < "$added.f") + $(wc -l < "$modified.f") + $(wc -l < "$deleted.f") ))
 
     if [ "$total" -eq 0 ]; then
-        echo "ℹ️  Commit ${target_sha:0:7}: sin cambios deployables (todo excluido)"
+        echo "   └─ ⏭️  Skipped: sólo cambios en archivos excluidos"
         {
             echo ""
-            echo "### Commit \`${target_sha:0:7}\` — _skipped (sólo cambios excluidos)_"
+            echo "---"
+            echo ""
+            echo "### ⏭️ Commit $commit_num/$commit_total · \`${target_sha:0:7}\` — _skipped_"
+            echo ""
+            echo "Sólo cambios en archivos excluidos por \`.deployignore\`."
         } >> "$SUMMARY"
         rm -rf "$tmp"
         return 0
@@ -245,30 +347,47 @@ deploy_range() {
     rsync_files "$tmp/upload.txt"
     ssh_rm_files "$deleted.f"
 
-    write_commit_report "$target_sha" "$added.f" "$modified.f" "$deleted.f"
+    write_commit_report "$target_sha" "$added.f" "$modified.f" "$deleted.f" "$commit_num" "$commit_total"
+    echo "   └─ ✅ Commit ${target_sha:0:7} deployado OK"
 
     rm -rf "$tmp"
 }
 
 deploy_full_initial() {
+    echo "   ├─ 📦 Modo INITIAL: subiendo TODO el repo (primera vez)"
     do_backup "INITIAL"
 
     local tmp; tmp=$(mktemp -d)
     git ls-files | filter_list > "$tmp/upload.txt"
     local n; n=$(wc -l < "$tmp/upload.txt" | tr -d ' ')
-    echo "📦 Deploy inicial: $n archivos"
+    echo "   ├─ 📊 Archivos a subir (filtrados por .deployignore): $n"
+    echo "   ├─ ⬆️  Subiendo..."
 
     rsync_files "$tmp/upload.txt"
+    TOTAL_ADDED=$n
+    TOTAL_COMMITS_OK=1
 
     {
         echo ""
-        echo "### 🆕 Deploy inicial"
+        echo "---"
         echo ""
-        echo "**$n archivos subidos** (todo el repo, filtrado por \`.deployignore\`)"
+        echo "### 🆕 Deploy inicial (INITIAL)"
         echo ""
-        echo "💾 Backup: \`$LAST_BACKUP\`"
+        echo "Primera vez que se deploya. Se subió **todo el repositorio** filtrado por \`.deployignore\`."
+        echo ""
+        echo "| Métrica | Valor |"
+        echo "|---|---:|"
+        echo "| 📦 Archivos subidos | **$n** |"
+        echo "| 💾 Backup | \`$LAST_BACKUP\` |"
+        echo ""
+        echo "<details><summary>📂 Ver lista completa de $n archivos</summary>"
+        echo ""
+        awk '{printf "%d. `%s`\n", NR, $0}' "$tmp/upload.txt"
+        echo ""
+        echo "</details>"
     } >> "$SUMMARY"
 
+    echo "   └─ ✅ Deploy inicial completado: $n archivos"
     rm -rf "$tmp"
 }
 
@@ -277,81 +396,108 @@ deploy_full_initial() {
 # ──────────────────────────────────────────────────────────────────────
 write_header
 
-# Resolver FROM_SHA
+# ETAPA 2: lectura del estado remoto
+echo "📋 ETAPA 2/5: Lectura del estado del servidor"
 if [ -z "$FROM_SHA" ]; then
     FROM_SHA=$(read_remote_sha)
-    echo "🔎 SHA remoto: $FROM_SHA"
+    echo "   ├─ 🔎 SHA encontrado en server: $FROM_SHA"
+else
+    echo "   ├─ 🔎 FROM_SHA manual: $FROM_SHA"
 fi
+echo "   └─ 🎯 SHA destino: ${TO_SHA:0:7}"
+echo ""
 
 # Caso 1: primer deploy (INITIAL)
 if [ "$FROM_SHA" = "INITIAL" ] || [ -z "$FROM_SHA" ]; then
+    echo "📋 ETAPA 3/5: Deploy inicial (INITIAL)"
     deploy_full_initial
+    echo ""
+    echo "📋 ETAPA 4/5: Actualizar .deployed_sha en server"
     write_remote_sha "$TO_SHA"
-    echo "✅ Deploy inicial completado"
+    write_final_summary
     exit 0
 fi
 
 # Validar que FROM_SHA existe en historial local
 if ! git cat-file -e "$FROM_SHA^{commit}" 2>/dev/null; then
-    echo "⚠️  FROM_SHA '$FROM_SHA' no existe en el historial local. Fallback a INITIAL."
+    echo "   ⚠️  FROM_SHA '$FROM_SHA' no existe en el historial local. Fallback a INITIAL."
+    echo ""
+    echo "📋 ETAPA 3/5: Deploy inicial (fallback)"
     deploy_full_initial
+    echo ""
+    echo "📋 ETAPA 4/5: Actualizar .deployed_sha en server"
     write_remote_sha "$TO_SHA"
+    write_final_summary
     exit 0
 fi
 
 # Caso 2: bulk
 if [ "$MODE" = "bulk" ]; then
-    echo "📦 Modo BULK: diff único $FROM_SHA → $TO_SHA"
-    deploy_range "$FROM_SHA" "$TO_SHA" "${TO_SHA:0:7}"
+    echo "📋 ETAPA 3/5: Deploy en modo BULK (diff único)"
+    echo "   ├─ 📦 Rango: ${FROM_SHA:0:7} → ${TO_SHA:0:7}"
+    deploy_range "$FROM_SHA" "$TO_SHA" "${TO_SHA:0:7}" 1 1
+    TOTAL_COMMITS_OK=1
+    echo ""
+    echo "📋 ETAPA 4/5: Actualizar .deployed_sha en server"
     write_remote_sha "$TO_SHA"
-    echo "✅ Deploy bulk completado"
+    write_final_summary
     exit 0
 fi
 
 # Caso 3: sequential (default)
-echo "🔁 Modo SEQUENTIAL: iterando commits $FROM_SHA → $TO_SHA"
 COMMITS=$(git rev-list --reverse "$FROM_SHA..$TO_SHA")
 if [ -z "$COMMITS" ]; then
-    echo "ℹ️  No hay commits nuevos para deployar."
+    echo "📋 ETAPA 3/5: Análisis de cambios"
+    echo "   └─ ℹ️  No hay commits nuevos. El server ya está al día."
     {
         echo ""
-        echo "### ℹ️ Sin cambios"
-        echo "El server ya está al día con el último commit."
+        echo "---"
+        echo ""
+        echo "### ℹ️ Sin cambios para deployar"
+        echo ""
+        echo "El servidor ya está al día con el último commit (\`${TO_SHA:0:7}\`)."
     } >> "$SUMMARY"
+    write_final_summary
     exit 0
 fi
+
+TOTAL_COMMITS=$(echo "$COMMITS" | wc -l | tr -d ' ')
+echo "📋 ETAPA 3/5: Deploy commit-por-commit ($TOTAL_COMMITS commits)"
+echo ""
 
 PREV="$FROM_SHA"
 LAST_OK="$FROM_SHA"
 COUNT=0
-TOTAL=$(echo "$COMMITS" | wc -l | tr -d ' ')
 
 for C in $COMMITS; do
     COUNT=$((COUNT + 1))
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "[$COUNT/$TOTAL] Deployando commit ${C:0:7}"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    SUBJECT=$(git log -1 --format=%s "$C")
+    echo "━━━ Commit $COUNT/$TOTAL_COMMITS · ${C:0:7} ━━━"
+    echo "   ├─ 📝 Mensaje: \"$SUBJECT\""
 
-    if deploy_range "$PREV" "$C" "${C:0:7}"; then
+    if deploy_range "$PREV" "$C" "${C:0:7}" "$COUNT" "$TOTAL_COMMITS"; then
         write_remote_sha "$C"
         LAST_OK="$C"
         PREV="$C"
+        TOTAL_COMMITS_OK=$((TOTAL_COMMITS_OK + 1))
+        echo ""
     else
-        echo "❌ Falló en commit ${C:0:7}. Fail-fast: NO se intentan los siguientes."
+        echo "   └─ ❌ FALLÓ. Fail-fast activado: los siguientes commits NO se intentan."
         {
             echo ""
-            echo "### ❌ Deploy abortado en commit \`${C:0:7}\`"
-            echo "Último SHA OK en server: \`${LAST_OK:0:7}\`. Próximo push retomará desde ahí."
+            echo "---"
+            echo ""
+            echo "## ❌ Deploy abortado en commit \`${C:0:7}\`"
+            echo ""
+            echo "**Último SHA OK en server:** \`${LAST_OK:0:7}\`"
+            echo ""
+            echo "El próximo push (o redeploy manual) retomará desde el último SHA OK y deployará los commits faltantes."
         } >> "$SUMMARY"
+        write_final_summary
         exit 1
     fi
 done
 
-echo ""
-echo "✅ Deploy completado: $COUNT commits aplicados"
-{
-    echo ""
-    echo "---"
-    echo "✅ **Deploy completado**: $COUNT commits aplicados secuencialmente."
-} >> "$SUMMARY"
+echo "📋 ETAPA 4/5: Verificación final"
+echo "   └─ ✅ Todos los commits aplicados correctamente"
+write_final_summary
