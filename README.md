@@ -9,7 +9,7 @@
 </div>
 
 ## 📋 Descripción
-Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, desarrollado por [Artisans Thinking](https://artisansthinking.com). Plataforma diseñada para ofrecer una experiencia de usuario óptima y facilitar la gestión de propiedades inmobiliarias.
+Sitio web profesional para el Estudio Jurídico de la Dra. Nadina Zaranich, desarrollado por [Giuliano Gerlo](https://giulianogerlo.vercel.app/). Plataforma diseñada para ofrecer una experiencia de usuario óptima y facilitar la gestión de propiedades inmobiliarias.
 
 ## ✨ Características Principales
 
@@ -148,6 +148,6 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 
 ---
 <div align="center">
-  <p>Desarrollado con ❤️ por <a href="https://artisanthinking.com">Artisans Thinking</a></p>
-  <img src="assets/img/Logo_Artisans.webp" alt="Artisans Thinking Logo" width="200">
+  <p>Desarrollado con ❤️ por <a href="https://giulianogerlo.vercel.app/">Giuliano Gerlo</a></p>
+  <img src="assets/img/logo-original.svg" alt="Giuliano Gerlo Logo" width="200">
 </div>

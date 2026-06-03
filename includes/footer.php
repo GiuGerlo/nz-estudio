@@ -60,8 +60,8 @@
                 <div class="col-md-6 text-center text-md-end">
                     <p class="mb-0">
                         Desarrollado por
-                        <a href="https://artisansthinking.com/" target="_blank" class="text-decoration-none">
-                            <img src="assets/img/Logo_Artisans.webp" alt="Artisans Thinking" class="footer-logo ms-2" style="height: 24px; vertical-align: middle;">
+                        <a href="https://giulianogerlo.vercel.app/" target="_blank" rel="noopener" class="text-decoration-none">
+                            <img src="assets/img/logo-secundario.svg" alt="Giuliano Gerlo" class="footer-logo ms-2" style="height: 28px; vertical-align: middle;">
                         </a>
                     </p>
                 </div>

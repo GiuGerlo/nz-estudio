@@ -38,6 +38,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      SSH_HOST:    ${{ secrets.SSH_HOST }}
+      SSH_PORT:    ${{ secrets.SSH_PORT }}
+      SSH_USER:    ${{ secrets.SSH_USER }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
     steps:
       - name: Checkout (con historial completo)
         uses: actions/checkout@v4
@@ -45,26 +51,33 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - name: Verificar archivos requeridos
-        run: |
-          test -f .deployignore || { echo "Falta .deployignore"; exit 1; }
-          test -x .github/scripts/deploy.sh || chmod +x .github/scripts/deploy.sh
-
       - name: Cargar SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Ejecutar redeploy
-        env:
-          SSH_HOST:    ${{ secrets.SSH_HOST }}
-          SSH_PORT:    ${{ secrets.SSH_PORT }}
-          SSH_USER:    ${{ secrets.SSH_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      - name: Verificar archivos requeridos
         run: |
-          ARGS="--mode=${{ inputs.mode }} --update-sha=${{ inputs.update_sha }} --to-sha=${{ inputs.to_sha }}"
+          test -f .deployignore || { echo "Falta .deployignore"; exit 1; }
+          chmod +x .github/scripts/deploy.sh
+
+      - name: 📋 ETAPA 1/5 — Configuración
+        run: |
+          ARGS="--phase=config --mode=${{ inputs.mode }} --update-sha=${{ inputs.update_sha }} --to-sha=${{ inputs.to_sha }}"
           if [ -n "${{ inputs.from_sha }}" ]; then
             ARGS="$ARGS --from-sha=${{ inputs.from_sha }}"
           fi
-          echo "Ejecutando: deploy.sh $ARGS"
           .github/scripts/deploy.sh $ARGS
+
+      - name: 📋 ETAPA 2/5 — Leer estado del servidor
+        run: .github/scripts/deploy.sh --phase=read-sha
+
+      - name: 📋 ETAPA 3/5 — Plan de deploy
+        run: .github/scripts/deploy.sh --phase=plan
+
+      - name: 📋 ETAPA 4/5 — Deploy de commits
+        run: .github/scripts/deploy.sh --phase=execute
+
+      - name: 📋 ETAPA 5/5 — Finalizar
+        if: always()
+        run: .github/scripts/deploy.sh --phase=finalize
