@@ -95,6 +95,14 @@
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
 
+    <!-- GLightbox (lightbox para galería Capua) -->
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    <script>
+      if (typeof GLightbox !== 'undefined') {
+        GLightbox({ selector: '.glightbox', touchNavigation: true, loop: true });
+      }
+    </script>
+
     </body>
 
     </html>

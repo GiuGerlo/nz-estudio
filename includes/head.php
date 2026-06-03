@@ -23,6 +23,7 @@
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/vendor/aos/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
 
     <!-- Main CSS File -->
     <link href="assets/css/main.css" rel="stylesheet">
@@ -43,6 +44,7 @@
             <nav id="navmenu" class="navmenu">
                 <ul>
                     <li><a href="inicio" class="active" style="text-decoration: none;">Inicio</a></li>
+                    <li><a href="#capua" style="text-decoration: none;">Capua</a></li>
                     <li><a href="#" id="alquiler-link" style="text-decoration: none;">Alquiler</a></li>
                     <li class="dropdown"><a href="#" style="text-decoration: none;"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>

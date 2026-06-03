@@ -2955,3 +2955,459 @@ section,
   font-weight: bold;
 }
 
+/*--------------------------------------------------------------
+# Sección CAPUA de Edilizia (publicitaria)
+--------------------------------------------------------------*/
+.capua {
+  background-color: var(--background-color);
+  border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
+  border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
+}
+
+.capua .capua-carousel {
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--default-color), transparent 88%);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.capua .capua-carousel .carousel-inner,
+.capua .capua-carousel .carousel-item {
+  height: 420px;
+}
+
+.capua .capua-carousel .capua-slide-img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+}
+
+.capua .capua-carousel .carousel-indicators {
+  margin-bottom: 0.75rem;
+}
+
+.capua .capua-carousel .carousel-indicators button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  margin: 0 4px;
+}
+
+.capua .capua-carousel .carousel-control-prev,
+.capua .capua-carousel .carousel-control-next {
+  width: 8%;
+  opacity: 0.85;
+}
+
+.capua .capua-placeholder {
+  height: 420px;
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--default-color), transparent 95%),
+    color-mix(in srgb, var(--default-color), transparent 95%) 12px,
+    transparent 12px,
+    transparent 24px
+  );
+  border: 2px dashed color-mix(in srgb, var(--default-color), transparent 80%);
+  color: var(--default-color);
+}
+
+.capua .capua-placeholder code {
+  background-color: color-mix(in srgb, var(--accent-color), transparent 90%);
+  color: var(--accent-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.capua .capua-eyebrow {
+  display: inline-block;
+  color: var(--accent-color);
+  font-family: var(--nav-font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.75rem;
+}
+
+.capua .capua-title {
+  font-family: var(--heading-font);
+  color: var(--heading-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+
+.capua .capua-title span {
+  font-weight: 300;
+  color: var(--accent-color);
+}
+
+.capua .capua-tagline {
+  font-style: italic;
+  color: color-mix(in srgb, var(--default-color), transparent 30%);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.capua .capua-desc {
+  color: var(--default-color);
+  margin-bottom: 1.5rem;
+}
+
+.capua .capua-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.capua .capua-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 85%);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: var(--heading-color);
+  background-color: var(--surface-color);
+  transition: all 0.25s ease;
+}
+
+.capua .capua-chips li i {
+  color: var(--accent-color);
+  font-size: 1rem;
+}
+
+.capua .capua-chips li:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent-color), transparent 80%);
+}
+
+.capua .btn-capua {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+  border: 2px solid var(--accent-color);
+  padding: 0.7rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-family: var(--nav-font);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.capua .btn-capua:hover {
+  background-color: transparent;
+  color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-color), transparent 70%);
+}
+
+.capua .btn-capua i {
+  transition: transform 0.3s ease;
+}
+
+.capua .btn-capua:hover i {
+  transform: translate(3px, -3px);
+}
+
+@media (max-width: 991.98px) {
+  .capua .capua-title {
+    font-size: 2rem;
+  }
+  .capua .capua-carousel,
+  .capua .capua-carousel .carousel-inner,
+  .capua .capua-carousel .carousel-item,
+  .capua .capua-carousel .capua-slide-img,
+  .capua .capua-placeholder {
+    height: 280px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .capua .capua-carousel,
+  .capua .capua-carousel .carousel-inner,
+  .capua .capua-carousel .carousel-item,
+  .capua .capua-carousel .capua-slide-img,
+  .capua .capua-placeholder {
+    height: 220px;
+  }
+  .capua .capua-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* ── Capua: lightbox hint sobre el slide ─────────────────────────── */
+.capua .capua-slide-link {
+  position: relative;
+  display: block;
+  cursor: zoom-in;
+}
+.capua .capua-zoom-hint {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.capua .capua-slide-link:hover .capua-zoom-hint {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Capua: divider entre bloques ────────────────────────────────── */
+.capua .capua-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--default-color), transparent 92%);
+  margin: 4rem 0;
+}
+
+.capua .capua-subtitle {
+  font-family: var(--heading-font);
+  color: var(--heading-color);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+/* ── Capua: crossfade "video" de transition-XX.jpg ───────────────── */
+.capua .capua-crossfade {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--default-color), transparent 92%);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--default-color), transparent 88%);
+}
+.capua .capua-crossfade-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 12s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  will-change: opacity;
+}
+/* img1 = base, siempre visible. Las que se "apilan" encima son img2 e img3. */
+.capua .capua-crossfade-img--1 {
+  opacity: 1;
+  animation: none;
+}
+.capua .capua-crossfade-img--2 {
+  opacity: 0;
+  animation-name: capua-stack-2;
+}
+.capua .capua-crossfade-img--3 {
+  opacity: 0;
+  animation-name: capua-stack-3;
+}
+/* img2 entra a los ~3s, se queda hasta el final del ciclo, sale junto con img3 */
+@keyframes capua-stack-2 {
+  0%, 25%   { opacity: 0; }   /* 0-3s: oculta */
+  33%, 91%  { opacity: 1; }   /* 4s fade-in → visible hasta 11s */
+  100%      { opacity: 0; }   /* 11-12s fade-out junto con img3 */
+}
+/* img3 entra a los ~7s, se queda hasta el final, sale junto con img2 */
+@keyframes capua-stack-3 {
+  0%, 58%   { opacity: 0; }   /* 0-7s: oculta */
+  66%, 91%  { opacity: 1; }   /* 8s fade-in → visible hasta 11s */
+  100%      { opacity: 0; }   /* 11-12s fade-out */
+}
+@media (prefers-reduced-motion: reduce) {
+  .capua .capua-crossfade-img {
+    animation: none;
+  }
+  .capua .capua-crossfade-img--1 { opacity: 1; }
+  .capua .capua-crossfade-img--2,
+  .capua .capua-crossfade-img--3 { opacity: 0; }
+}
+
+/* ── Capua: grid de amenities ────────────────────────────────────── */
+.capua .capua-amenities {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem 1rem;
+  padding: 0;
+  margin: 0;
+}
+.capua .capua-amenities li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.25rem 0.5rem;
+  border-radius: 0.75rem;
+  background-color: var(--surface-color);
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
+  transition: all 0.3s ease;
+}
+.capua .capua-amenities li i {
+  font-size: 2.25rem;
+  color: var(--accent-color);
+  margin-bottom: 0.6rem;
+  transition: transform 0.3s ease;
+}
+.capua .capua-amenities li span {
+  font-family: var(--nav-font);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--heading-color);
+}
+.capua .capua-amenities li:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent-color), transparent 80%);
+}
+.capua .capua-amenities li:hover i {
+  transform: scale(1.1);
+}
+
+@media (max-width: 991.98px) {
+  .capua .capua-amenities {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .capua .capua-divider {
+    margin: 3rem 0;
+  }
+}
+@media (max-width: 575.98px) {
+  .capua .capua-amenities {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .capua .capua-amenities li i {
+    font-size: 1.85rem;
+  }
+}
+
+/* ── Capua: galería del complejo (strip horizontal con expand on hover) ── */
+.capua .capua-gallery {
+  display: flex;
+  gap: 0;
+  height: 420px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--default-color), transparent 88%);
+}
+.capua .capua-gallery-item {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  cursor: zoom-in;
+  background-color: color-mix(in srgb, var(--default-color), transparent 92%);
+  transition: flex-grow 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.capua .capua-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease, filter 0.4s ease;
+}
+/* Cuando hay hover sobre el contenedor: los items NO hovereados se oscurecen levemente */
+.capua .capua-gallery:hover .capua-gallery-item:not(:hover) img {
+  filter: brightness(0.75) saturate(0.9);
+}
+.capua .capua-gallery-item:hover {
+  flex-grow: 4;
+}
+.capua .capua-gallery-item:hover img {
+  transform: scale(1.04);
+}
+
+/* En tablet/mobile el accordion no funciona (no hay hover) → grid normal */
+@media (max-width: 991.98px) {
+  .capua .capua-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .capua .capua-gallery-item {
+    aspect-ratio: 4 / 3;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--default-color), transparent 90%);
+  }
+  .capua .capua-gallery:hover .capua-gallery-item:not(:hover) img {
+    filter: none;
+  }
+  .capua .capua-gallery-item:hover { flex-grow: initial; }
+}
+@media (max-width: 575.98px) {
+  .capua .capua-gallery { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Capua: bloque ubicación ─────────────────────────────────────── */
+.capua .capua-ubicacion-link {
+  position: relative;
+  display: block;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  cursor: zoom-in;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--default-color), transparent 88%);
+}
+.capua .capua-ubicacion-img {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.capua .capua-ubicacion-link:hover .capua-ubicacion-img {
+  transform: scale(1.03);
+}
+
+.capua .btn-capua-outline {
+  display: inline-flex;
+  align-items: center;
+  background-color: transparent;
+  color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+  padding: 0.7rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-family: var(--nav-font);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.capua .btn-capua-outline:hover {
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent-color), transparent 70%);
+}
+
+@media (max-width: 991.98px) {
+  .capua .capua-ubicacion-img { height: 280px; }
+}
+@media (max-width: 575.98px) {
+  .capua .capua-ubicacion-img { height: 220px; }
+}
+
