@@ -1,4 +1,5 @@
 <?php
+//Prueba de conexión a la base de datos
 $page_title = "Estudio Jurídico-Inmobiliario - Nadina Zaranich";
 $page_description = "Servicios inmobiliarios y asesoramiento jurídico en Guatimozín y zona. Especialistas en compra, venta y gestión de propiedades con respaldo legal profesional.";
 $page_image = "assets/img/logo.png";
