@@ -8,7 +8,8 @@
       "Bash(python -c \"import yaml; yaml.safe_load\\(open\\('/c/laragon/www/nz-estudio/.github/workflows/deploy.yml'\\)\\); print\\('deploy.yml: OK'\\)\")",
       "Bash(python -c \"import yaml; yaml.safe_load\\(open\\('/c/laragon/www/nz-estudio/.github/workflows/redeploy.yml'\\)\\); print\\('redeploy.yml: OK'\\)\")",
       "Bash(node -e \"const yaml=require\\('js-yaml'\\); const fs=require\\('fs'\\); console.log\\('deploy.yml:', yaml.load\\(fs.readFileSync\\('/c/laragon/www/nz-estudio/.github/workflows/deploy.yml','utf8'\\)\\) ? 'OK' : 'FAIL'\\); console.log\\('redeploy.yml:', yaml.load\\(fs.readFileSync\\('/c/laragon/www/nz-estudio/.github/workflows/redeploy.yml','utf8'\\)\\) ? 'OK' : 'FAIL'\\)\")",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(gh run *)"
     ]
   }
 }

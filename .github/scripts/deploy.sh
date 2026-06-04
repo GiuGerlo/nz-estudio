@@ -87,18 +87,54 @@ save_state() {
 # ──────────────────────────────────────────────────────────────────────
 # Helpers SSH/rsync
 # ──────────────────────────────────────────────────────────────────────
-SSH_OPTS=(-p "$SSH_PORT" -o StrictHostKeyChecking=accept-new -o BatchMode=yes)
+SSH_OPTS=(
+    -p "$SSH_PORT"
+    -o StrictHostKeyChecking=accept-new
+    -o BatchMode=yes
+    -o ConnectTimeout=15
+    -o ServerAliveInterval=10
+    -o ServerAliveCountMax=3
+)
 
-ssh_run() {
-    ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "$@"
+# Retry wrapper: 3 intentos con backoff 5s/15s. Para glitches transitorios
+# de Hostinger (timeouts SSH, rate-limit, latencia).
+SSH_MAX_RETRIES=3
+SSH_BACKOFFS=(5 15)
+
+with_retry() {
+    local attempt=1
+    local rc=0
+    while [ "$attempt" -le "$SSH_MAX_RETRIES" ]; do
+        "$@" && return 0
+        rc=$?
+        if [ "$attempt" -lt "$SSH_MAX_RETRIES" ]; then
+            local sleep_for="${SSH_BACKOFFS[$((attempt - 1))]:-15}"
+            echo "   ⚠️  Intento $attempt falló (rc=$rc). Reintento en ${sleep_for}s..." >&2
+            sleep "$sleep_for"
+        fi
+        attempt=$((attempt + 1))
+    done
+    echo "   ❌ Falló tras $SSH_MAX_RETRIES intentos (rc=$rc)" >&2
+    return "$rc"
 }
 
-rsync_files() {
+_ssh_run_once() {
+    ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "$@"
+}
+ssh_run() {
+    with_retry _ssh_run_once "$@"
+}
+
+_rsync_files_once() {
     local list_file="$1"
-    [ -s "$list_file" ] || return 0
     rsync -az --files-from="$list_file" \
           -e "ssh ${SSH_OPTS[*]}" \
           ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+}
+rsync_files() {
+    local list_file="$1"
+    [ -s "$list_file" ] || return 0
+    with_retry _rsync_files_once "$list_file"
 }
 
 ssh_rm_files() {
