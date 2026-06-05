@@ -18,6 +18,7 @@ services:
       - .:/var/www/html
     environment:
       NZ_ENV: docker
+      TZ: UTC
       APACHE_RUN_USER: www-data
       APACHE_RUN_GROUP: www-data
     env_file:
@@ -38,7 +39,10 @@ services:
     image: mariadb:11.8.6
     container_name: nz_db
     restart: unless-stopped
+    # Política nz-estudio: la DB SIEMPRE en UTC. UI formatea a AR aparte.
+    command: ["--default-time-zone=+00:00"]
     environment:
+      TZ: UTC
       MARIADB_DATABASE: ${DB_DOCKER_NAME:-nz-estudio}
       MARIADB_USER: ${DB_DOCKER_USER:-nz}
       MARIADB_PASSWORD: ${DB_DOCKER_PASS:-nzdev}

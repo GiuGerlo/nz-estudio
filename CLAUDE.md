@@ -254,6 +254,7 @@ Detalles completos, troubleshooting y comandos avanzados en `docs/DOCKER.md`.
 - Idioma del proyecto y comunicación: **español**.
 - A futuro: migrar todo el sitio a **React** (proyecto pendiente, ver memoria del proyecto). Para fixes puntuales seguir en PHP. Refactors grandes evaluarlos a la luz de la migración futura.
 - **Commits los hace el usuario**, no Claude. Claude solo entrega el mensaje sugerido (Conventional Commits, ≤50 chars en el subject).
+- **Fechas**: server (PHP + MariaDB) opera en **UTC** siempre. La UI formatea a `America/Argentina/Cordoba` con el helper `nz_fmt_ar($utc, $fmt)` de `includes/security.php`. **Nunca** mostrar UTC crudo al usuario; **nunca** cambiar la TZ del SO del server.
 
 ## 15. CodeGraph MCP — reducir tokens
 

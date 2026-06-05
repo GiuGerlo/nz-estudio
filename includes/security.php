@@ -225,3 +225,113 @@ function nz_sanitize_filename(string $name): string
     $name = preg_replace('/[^A-Za-z0-9._-]/', '_', $name);
     return substr($name, 0, 100);
 }
+
+// ─── Formato de fechas (política UTC server → AR UI) ──────────────────
+/**
+ * Convierte un datetime guardado en UTC (en DB o cualquier string parseable
+ * por DateTime) al timezone America/Argentina/Cordoba y lo formatea.
+ *
+ * $utc:   string en UTC (ej. '2026-06-05 15:29:42') o un DateTime.
+ * $fmt:   formato PHP (default 'd/m/Y H:i').
+ *
+ * Política: el server guarda y opera en UTC. NUNCA mostrar UTC crudo al usuario.
+ */
+function nz_fmt_ar($utc, string $fmt = 'd/m/Y H:i'): string
+{
+    if (empty($utc)) {
+        return '';
+    }
+    try {
+        $dt = ($utc instanceof DateTimeInterface)
+            ? DateTime::createFromInterface($utc)
+            : new DateTime((string)$utc, new DateTimeZone('UTC'));
+        $dt->setTimezone(new DateTimeZone('America/Argentina/Cordoba'));
+        return $dt->format($fmt);
+    } catch (Exception $e) {
+        return (string)$utc;
+    }
+}
+
+// ─── IP del cliente ────────────────────────────────────────────────────
+/**
+ * IP real del cliente. Hostinger pasa la IP en REMOTE_ADDR; no confiamos
+ * en X-Forwarded-For por defecto para evitar spoofing.
+ */
+function nz_client_ip(): string
+{
+    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
+
+// ─── Rate-limit de login ───────────────────────────────────────────────
+/**
+ * Verifica si el cliente está bloqueado por intentos fallidos.
+ * Devuelve ['blocked' => bool, 'retry_after' => int seconds].
+ *
+ * Reglas (configurables):
+ *   - 10 fallos por IP en ventana de 15 min
+ *   - 5  fallos por email en ventana de 15 min
+ */
+function nz_login_attempts_check(mysqli $db, string $ip, string $email): array
+{
+    $window_min = 15;
+    $max_ip     = 10;
+    $max_email  = 5;
+    $now        = new DateTime();
+
+    $stmt = $db->prepare(
+        "SELECT COUNT(*) AS n, MAX(attempted_at) AS last
+         FROM login_attempts
+         WHERE ip = ? AND success = 0 AND attempted_at > (NOW() - INTERVAL ? MINUTE)"
+    );
+    $stmt->bind_param('si', $ip, $window_min);
+    $stmt->execute();
+    $ip_row = $stmt->get_result()->fetch_assoc();
+
+    $stmt = $db->prepare(
+        "SELECT COUNT(*) AS n, MAX(attempted_at) AS last
+         FROM login_attempts
+         WHERE email = ? AND success = 0 AND attempted_at > (NOW() - INTERVAL ? MINUTE)"
+    );
+    $stmt->bind_param('si', $email, $window_min);
+    $stmt->execute();
+    $em_row = $stmt->get_result()->fetch_assoc();
+
+    $by_ip    = ((int)$ip_row['n']) >= $max_ip;
+    $by_email = ((int)$em_row['n']) >= $max_email;
+
+    if (!$by_ip && !$by_email) {
+        return ['blocked' => false, 'retry_after' => 0];
+    }
+
+    // Calcular retry_after: cuánto falta para que el más viejo de los
+    // intentos relevantes salga de la ventana.
+    $last_ip = $ip_row['last'] ?? $now->format('Y-m-d H:i:s');
+    $last_em = $em_row['last'] ?? $now->format('Y-m-d H:i:s');
+    $base    = $by_ip ? $last_ip : $last_em;
+    $unlock  = (new DateTime($base))->modify("+{$window_min} minutes");
+    $diff    = max(60, $unlock->getTimestamp() - $now->getTimestamp());
+
+    return ['blocked' => true, 'retry_after' => $diff];
+}
+
+function nz_login_attempts_record(mysqli $db, string $ip, string $email, bool $success): void
+{
+    $s = $success ? 1 : 0;
+    $stmt = $db->prepare(
+        "INSERT INTO login_attempts (ip, email, success) VALUES (?, ?, ?)"
+    );
+    $stmt->bind_param('ssi', $ip, $email, $s);
+    $stmt->execute();
+}
+
+/**
+ * Limpieza periódica: borra registros viejos (>24h). Llamar ocasionalmente
+ * (probabilidad 1%, no cada login) para evitar carga.
+ */
+function nz_login_attempts_gc(mysqli $db): void
+{
+    if (random_int(1, 100) !== 1) {
+        return;
+    }
+    $db->query("DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL 24 HOUR)");
+}

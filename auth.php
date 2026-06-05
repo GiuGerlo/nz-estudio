@@ -12,40 +12,57 @@ try {
     // Verificar token CSRF antes de cualquier procesamiento
     nz_csrf_require();
 
-    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $email    = strtolower(trim((string)filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL)));
     $password = $_POST['password'] ?? '';
+    $ip       = nz_client_ip();
 
-    if (empty($email) || empty($password)) {
-        throw new Exception('Por favor completa todos los campos');
+    if ($email === '' || $password === '') {
+        throw new Exception('Completá email y contraseña.');
     }
 
-    // Buscar usuario en la base de datos
+    // Rate-limit
+    $check = nz_login_attempts_check($db, $ip, $email);
+    if ($check['blocked']) {
+        $mins = (int)ceil($check['retry_after'] / 60);
+        http_response_code(429);
+        header('Retry-After: ' . $check['retry_after']);
+        $response['message']     = "Demasiados intentos. Esperá ~{$mins} minuto(s) y volvé a intentar.";
+        $response['retry_after'] = $check['retry_after'];
+        echo json_encode($response);
+        exit;
+    }
+
+    // Lookup usuario
     $stmt = $db->prepare("SELECT id, email, password FROM users WHERE email = ?");
     $stmt->bind_param('s', $email);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+    $user = $stmt->get_result()->fetch_assoc();
 
-    if (!$user || !password_verify($password, $user['password'])) {
-        throw new Exception('Credenciales inválidas');
+    $ok = ($user && password_verify($password, $user['password']));
+
+    // Registrar intento (éxito o fallo) — incluso fallos por email inexistente,
+    // para que el rate-limit cuente esos casos también.
+    nz_login_attempts_record($db, $ip, $email, $ok);
+    nz_login_attempts_gc($db);
+
+    if (!$ok) {
+        // Mensaje genérico: no revelar si el email existe.
+        throw new Exception('Email o contraseña incorrectos.');
     }
 
-    // Regenerar ID de sesión para evitar session fixation
+    // Login válido: regenerar ID de sesión para evitar fixation
     session_regenerate_id(true);
 
-    // Iniciar sesión
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['user_email'] = $user['email'];
+    $_SESSION['user_id']       = $user['id'];
+    $_SESSION['user_email']    = $user['email'];
     $_SESSION['last_activity'] = time();
 
     $response = [
         'success' => true,
         'message' => 'Inicio de sesión exitoso'
     ];
-
 } catch (Exception $e) {
     $response['message'] = $e->getMessage();
 }
 
 echo json_encode($response);
-?>

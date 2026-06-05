@@ -101,46 +101,89 @@
    */
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
+    const submitBtn = loginForm.querySelector('button[type=submit]');
+    const submitBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+    const setLoading = (on) => {
+      if (!submitBtn) return;
+      submitBtn.disabled = on;
+      submitBtn.innerHTML = on
+        ? '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Verificando...'
+        : submitBtnHtml;
+      loginForm.querySelectorAll('input').forEach(i => { i.disabled = on; });
+    };
+
     loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
+      // FormData primero, disable después (inputs disabled no entran en FormData).
       const formData = new FormData(loginForm);
-      
-      fetch('auth.php', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: '¡Bienvenido!',
-            text: 'Inicio de sesión exitoso',
-            showConfirmButton: false,
-            timer: 1500
-          }).then(() => {
-            window.location.href = 'admin/admin.php';
-          });
-        } else {
+      setLoading(true);
+
+      fetch('auth.php', { method: 'POST', body: formData })
+        .then(async response => {
+          let data = {};
+          try { data = await response.json(); } catch (_) { /* no-op */ }
+          return { status: response.status, data: data };
+        })
+        .then(({ status, data }) => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Bienvenido!',
+              text: 'Inicio de sesión exitoso',
+              showConfirmButton: false,
+              timer: 1200
+            }).then(() => { window.location.href = 'admin/admin.php'; });
+            return;
+          }
+
+          if (status === 429) {
+            // Rate-limit: mostrar tiempo restante
+            Swal.fire({
+              icon: 'warning',
+              title: 'Demasiados intentos',
+              text: data.message || 'Esperá unos minutos antes de reintentar.',
+              confirmButtonColor: '#2c5f87'
+            });
+            return;
+          }
+
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: data.message || 'Credenciales incorrectas',
+            text: data.message || 'Email o contraseña incorrectos.',
             confirmButtonColor: '#2c5f87'
           });
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al procesar la solicitud',
-          confirmButtonColor: '#2c5f87'
-        });
-      });
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al procesar la solicitud.',
+            confirmButtonColor: '#2c5f87'
+          });
+        })
+        .finally(() => setLoading(false));
     });
   }
+
+  /**
+   * Toggle show/hide password (cualquier .toggle-password con data-target="#input-id")
+   */
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.querySelector(btn.dataset.target);
+      if (!target) return;
+      const showing = target.type === 'text';
+      target.type = showing ? 'password' : 'text';
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('bi-eye', showing);
+        icon.classList.toggle('bi-eye-slash', !showing);
+      }
+    });
+  });
 
 })();

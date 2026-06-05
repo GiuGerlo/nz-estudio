@@ -66,6 +66,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?php echo ($current_page == 'perfil.php') ? 'active' : ''; ?>" href="perfil.php">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Perfil</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="../logout.php">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Cerrar Sesión</span>
