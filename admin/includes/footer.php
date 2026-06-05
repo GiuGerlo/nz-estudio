@@ -1,9 +1,15 @@
-    </div> <!-- Cierre de main-content -->
+    </div> <!-- /.nz-main -->
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Sidebar toggle + persist -->
+    <script src="assets/js/core/sidebar.js"></script>
+
+    <!-- Lógica común admin (toggle viejo, mantengo por compatibilidad si algún JS lo usa) -->
     <script src="assets/js/main.js"></script>
-    
+
     <?php if (isset($includeDataTablesStyles) && $includeDataTablesStyles): ?>
     <!-- DataTables JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>

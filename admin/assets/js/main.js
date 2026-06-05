@@ -97,46 +97,9 @@ function addExportButtons(dataTable, title = 'Datos') {
     return dataTable;
 }
 
-// Toggle sidebar on mobile
-document.addEventListener('DOMContentLoaded', function() {
-    // Toggle sidebar on mobile
-    document.querySelector('.toggle-sidebar')?.addEventListener('click', function() {
-        document.querySelector('.sidebar').classList.toggle('show');
-    });
-
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(event) {
-        const sidebar = document.querySelector('.sidebar');
-        const toggleBtn = document.querySelector('.toggle-sidebar');
-        
-        if (window.innerWidth < 768 && 
-            sidebar.classList.contains('show') && 
-            !sidebar.contains(event.target) && 
-            !toggleBtn.contains(event.target)) {
-            sidebar.classList.remove('show');
-        }
-    });
-
-    // Responsive adjustments
-    function adjustLayout() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-        
-        if (window.innerWidth < 768) {
-            sidebar.classList.remove('show');
-            mainContent.style.marginLeft = '0';
-        } else if (window.innerWidth < 992) {
-            mainContent.style.marginLeft = '70px';
-        } else {
-            mainContent.style.marginLeft = '250px';
-        }
-    }
-
-    // Initial call and event listener
-    window.addEventListener('resize', adjustLayout);
-    adjustLayout();
-    
-    // Iniciar el reloj si existe el elemento
+// El toggle del sidebar se maneja en core/sidebar.js.
+// Acá solo arrancamos el reloj si la página lo usa.
+document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('hora-actual')) {
         actualizarHora();
     }

@@ -1,36 +1,8 @@
-/* login.css — Paleta proto compartida con la futura Fase 3 (admin redesign).
-   Mantener tokens estables: cualquier cambio acá impacta Fase 3.
+/* login.css — Estilos del login.
+   Tokens compartidos en tokens.css (Fase 3 admin reusa los mismos).
 */
 
-:root {
-    /* Paleta — proto Fase 3 */
-    --nz-primary:        #2c5f87;
-    --nz-primary-hover:  #1f4a6b;
-    --nz-primary-soft:   #e7f0f7;
-    --nz-accent:         #3690e7;
-
-    --nz-surface:        #ffffff;
-    --nz-surface-2:      #f8fafc;
-    --nz-surface-3:      #eef2f7;
-
-    --nz-border:         #e2e8f0;
-    --nz-border-strong:  #cbd5e1;
-
-    --nz-text:           #1e293b;
-    --nz-text-muted:     #64748b;
-
-    --nz-danger:         #dc3545;
-    --nz-success:        #198754;
-
-    --nz-radius:         14px;
-    --nz-radius-sm:      8px;
-
-    --nz-shadow-sm:      0 1px 2px rgba(15, 23, 42, .06);
-    --nz-shadow-md:      0 8px 24px rgba(15, 23, 42, .08);
-    --nz-shadow-lg:      0 20px 50px rgba(15, 23, 42, .12);
-
-    --nz-transition:     .2s ease;
-}
+@import url('./tokens.css');
 
 /* ─── Layout ──────────────────────────────────────────────────────── */
 html, body { height: 100%; }
