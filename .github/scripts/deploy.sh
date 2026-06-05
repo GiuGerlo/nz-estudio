@@ -184,18 +184,43 @@ filter_list() {
 }
 
 # ──────────────────────────────────────────────────────────────────────
-# Backup remoto
+# Backup remoto (INCREMENTAL)
+#
+# A diferencia del backup full anterior, este sólo respalda los archivos
+# que el commit va a modificar o eliminar. Los archivos `added` no se
+# respaldan: no existen aún en el server, nada que perder.
+#
+# Si rollback hace falta: extraer el tar.gz al DEPLOY_PATH y los archivos
+# vuelven a su versión pre-cambio. Los added quedarán en el server (basura
+# inocua) pero se pueden borrar leyendo el .deployed_sha previo.
+#
+# Backup name: ${ts}_${label}_${n}files.tar.gz
+# Rotación: últimos 10 (antes 5, ahora son ~KB en vez de ~MB).
 # ──────────────────────────────────────────────────────────────────────
 do_backup() {
     local label="$1"
+    local files_list="${2:-}"
+
+    if [ -z "$files_list" ] || [ ! -s "$files_list" ]; then
+        echo "   ├─ 💾 Backup: omitido (sin archivos previos a respaldar)"
+        LAST_BACKUP="(omitido)"
+        return 0
+    fi
+
     local ts; ts=$(date +%Y%m%d_%H%M%S)
-    local backup_name="${ts}_${label}.tar.gz"
-    echo "   ├─ 💾 Backup: $backup_name"
-    if ssh_run "mkdir -p '$BACKUP_DIR_REMOTE' && \
-             tar --exclude='uploads' --exclude='backups' --exclude='_backups' \
-                 -czf '$BACKUP_DIR_REMOTE/$backup_name' \
-                 -C '$DEPLOY_PATH' . 2>/dev/null && \
-             ls -1t '$BACKUP_DIR_REMOTE'/*.tar.gz | tail -n +6 | xargs -r rm --"; then
+    local n; n=$(wc -l < "$files_list" | tr -d ' ')
+    local backup_name="${ts}_${label}_${n}files.tar.gz"
+    echo "   ├─ 💾 Backup incremental: $backup_name ($n archivo(s))"
+
+    # No usamos with_retry: stdin no se puede "rebobinar" en reintentos.
+    # Si el backup falla, el deploy sigue (no es bloqueante).
+    if ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" \
+            "mkdir -p '$BACKUP_DIR_REMOTE' && \
+             cd '$DEPLOY_PATH' && \
+             tar -czf '$BACKUP_DIR_REMOTE/$backup_name' \
+                 --files-from=- --ignore-failed-read 2>/dev/null && \
+             ls -1t '$BACKUP_DIR_REMOTE'/*.tar.gz | tail -n +11 | xargs -r rm --" \
+            < "$files_list"; then
         LAST_BACKUP="$backup_name"
         TOTAL_BACKUPS=$((TOTAL_BACKUPS + 1))
     else
@@ -277,8 +302,6 @@ deploy_one_commit() {
     echo "━━━ Commit $commit_num/$commit_total · $sha7 ━━━"
     echo "   ├─ 📝 Mensaje: \"$subject\""
 
-    do_backup "$sha7"
-
     local tmp; tmp=$(mktemp -d)
     local added="$tmp/added.txt" modified="$tmp/modified.txt" deleted="$tmp/deleted.txt"
     : > "$added"; : > "$modified"; : > "$deleted"
@@ -314,6 +337,12 @@ deploy_one_commit() {
         rm -rf "$tmp"
         return 0
     fi
+
+    # Backup INCREMENTAL: respalda sólo lo que vamos a pisar/borrar
+    # (modified + deleted). Los added son nuevos en server, no hay nada
+    # que respaldar para ellos.
+    cat "$modified.f" "$deleted.f" > "$tmp/backup.txt"
+    do_backup "$sha7" "$tmp/backup.txt"
 
     git checkout --quiet "$target_sha"
 
@@ -500,7 +529,8 @@ phase_execute() {
 
     case "${MODE_RESOLVED:-}" in
         initial)
-            do_backup "INITIAL"
+            # No hay backup: es el primer deploy, no hay archivos previos en server.
+            LAST_BACKUP="(no aplica, deploy inicial)"
             local n; n=$(wc -l < "$FILES_FILE" | tr -d ' ')
             echo "   ├─ ⬆️  Subiendo $n archivos (modo INITIAL)..."
             rsync_files "$FILES_FILE"
@@ -517,7 +547,7 @@ phase_execute() {
                 echo "| Métrica | Valor |"
                 echo "|---|---:|"
                 echo "| 📦 Archivos subidos | **$n** |"
-                echo "| 💾 Backup | \`${LAST_BACKUP:-(ninguno)}\` |"
+                echo "| 💾 Backup | _no aplica (deploy inicial)_ |"
                 echo ""
                 echo "<details><summary>📂 Ver lista completa de $n archivos</summary>"
                 echo ""

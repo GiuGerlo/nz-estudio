@@ -32,6 +32,16 @@ LICENSE
 .agents/
 skills-lock.json
 
+# Docker (solo para desarrollo local, jamás llegan a Hostinger)
+docker/
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+.docker-data/
+
+# Dump de DB de desarrollo (nunca pisar la prod)
+db/
+
 # Basura de sistema operativo
 Thumbs.db
 .DS_Store

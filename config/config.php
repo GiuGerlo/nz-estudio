@@ -6,11 +6,22 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
 
 require_once __DIR__ . '/env.php';
 
-// Detectar entorno (local o producción)
-$isLocal = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']) ||
-           (function_exists('str_contains') && str_contains($_SERVER['HTTP_HOST'] ?? '', 'local'));
+// Detectar entorno: Docker > Laragon (legacy) > Producción.
+// Docker: el Dockerfile setea ENV NZ_ENV=docker. También match por puerto 8080 en HTTP_HOST.
+$host       = $_SERVER['HTTP_HOST'] ?? '';
+$isDocker   = (getenv('NZ_ENV') === 'docker') || str_contains($host, ':8080');
+$isLaragon  = !$isDocker && (
+    in_array($host, ['localhost', '127.0.0.1'], true)
+    || str_contains($host, '.test')
+    || str_contains($host, '.local')
+);
 
-if ($isLocal) {
+if ($isDocker) {
+    $server   = env('DB_DOCKER_HOST', 'db');
+    $username = env('DB_DOCKER_USER', 'nz');
+    $password = env('DB_DOCKER_PASS', 'nzdev');
+    $database = env('DB_DOCKER_NAME', 'nz-estudio');
+} elseif ($isLaragon) {
     $server   = env('DB_LOCAL_HOST', 'localhost:3307');
     $username = env('DB_LOCAL_USER', 'root');
     $password = env('DB_LOCAL_PASS', '');

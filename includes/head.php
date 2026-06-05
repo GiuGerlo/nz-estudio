@@ -44,7 +44,7 @@
             <nav id="navmenu" class="navmenu">
                 <ul>
                     <li><a href="inicio" class="active" style="text-decoration: none;">Inicio</a></li>
-                    <li><a href="#capua" style="text-decoration: none;">Capua</a></li>
+                    <li><a href="inicio#capua" style="text-decoration: none;">Capua</a></li>
                     <li><a href="#" id="alquiler-link" style="text-decoration: none;">Alquiler</a></li>
                     <li class="dropdown"><a href="#" style="text-decoration: none;"><span>Venta</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                         <ul>

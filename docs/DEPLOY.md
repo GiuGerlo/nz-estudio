@@ -179,28 +179,32 @@ update_sha: false
 
 ---
 
-## 8. Rollback con backups
+## 8. Rollback con backups (incrementales)
 
 Cada commit genera un backup en el server, fuera de `public_html`:
 ```
-<DEPLOY_PATH>/../backups/20260603_142315_<sha7>.tar.gz
+<DEPLOY_PATH>/../backups/20260603_142315_<sha7>_<N>files.tar.gz
 ```
 
-Se conservan los **últimos 5** (los más viejos se borran solos).
+El backup es **incremental**: contiene únicamente los archivos que ese commit va a modificar o eliminar (no respalda los `added`, que son nuevos). Tamaño típico: bytes a KB en vez de los MB del proyecto entero.
 
-### Rollback manual (1 comando, vía SSH)
+Se conservan los **últimos 10** (los más viejos se borran solos). Si el commit sólo agrega archivos, no se crea backup (no hay nada que respaldar).
+
+### Rollback manual (vía SSH)
 
 ```bash
 # 1. Conectar al server
 ssh -p $SSH_PORT -i ~/.ssh/nz_deploy $SSH_USER@$SSH_HOST
 
-# 2. Listar backups disponibles
+# 2. Listar backups disponibles (el nombre incluye el SHA y la cantidad de archivos)
 ls -lh ~/domains/nz-estudio.com/backups/
 
-# 3. Restaurar el que quieras (esto SOBREESCRIBE public_html, excepto uploads/)
+# 3. Restaurar (sobreescribe sólo los archivos modificados/eliminados de ese commit)
 cd ~/domains/nz-estudio.com/public_html
-tar -xzf ../backups/20260603_142315_8f14f9d.tar.gz
+tar -xzf ../backups/20260603_142315_8f14f9d_12files.tar.gz
 ```
+
+⚠️ Nota importante del modelo incremental: el rollback restaura los archivos que el commit fallido había pisado/borrado, pero **no borra los archivos que ese commit había agregado** (esos quedan como basura inocua en el server). Si querés rollback total al estado previo, además del extract hay que `rm` los archivos que el commit fallido agregó — consultá la lista en el reporte del workflow (sección "➕ Nuevos" del summary).
 
 **Después del rollback manual** decidí qué hacer con `.deployed_sha`:
 - Si querés que el próximo push reaplique lo que rollbackeaste: dejá `.deployed_sha` como está (con el SHA del que fallaba).
@@ -252,7 +256,7 @@ ssh_run "cd $DEPLOY_PATH && php artisan cache:clear"  # ejemplo
 ```
 
 ### Cambiar cantidad de backups conservados
-En `deploy.sh`, función `do_backup`, cambiar `tail -n +6` por `tail -n +N+1` (conserva últimos N).
+En `deploy.sh`, función `do_backup`, cambiar `tail -n +11` por `tail -n +N+1` (conserva últimos N). Default: 10.
 
 ### Cambiar branch que dispara deploy
 En `.github/workflows/deploy.yml`, línea `branches: [production]`, cambiar a la branch deseada.

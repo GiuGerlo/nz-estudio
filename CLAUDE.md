@@ -1,50 +1,68 @@
 # CLAUDE.md — nz-estudio
 
-Brief de contexto para Claude. Sitio web del **Estudio Jurídico-Inmobiliario Nadina Zaranich** (Guatimozín, Córdoba). Catálogo público de propiedades + panel admin con CRUD. Desarrollado por Artisans Thinking.
+Brief de contexto para Claude. Sitio web del **Estudio Jurídico-Inmobiliario Nadina Zaranich** (Guatimozín, Córdoba). Catálogo público de propiedades + panel admin con CRUD + sección publicitaria de proyecto destacado (Capua de Edilizia). Desarrollado por **Giuliano Gerlo** ([giulianogerlo.vercel.app](https://giulianogerlo.vercel.app/)).
+
+**Producción**: https://nz-estudiojuridicoinmobiliario.com/ (Hostinger).
+**Repo**: GiuGerlo/nz-estudio. Branches: `main` (dev) · `production` (lo que está deployado).
 
 ## 1. Stack
 
 - **PHP 8.2.12** procedural. Sin Composer. Sin framework.
 - **MySQL/MariaDB** vía `mysqli` (NO PDO). Instancia global `$db` creada en `config/config.php`.
-- **Frontend**: Bootstrap 5.3.2, Bootstrap Icons, AOS, SweetAlert2, jQuery 3.7.
+- **Frontend**: Bootstrap 5.3.2, Bootstrap Icons, AOS, SweetAlert2, jQuery 3.7, **GLightbox** (galería de Capua).
 - **Admin**: DataTables 1.13.7 (jQuery), Font Awesome 6.4.2.
 - **Mapas**: Google Maps API (iframe embeds + MarkerClusterer en `templates/map.php`).
-- **Analytics**: GA4, ID `G-0CG4DEM9KS` (en `config/config.php`).
-- **Entorno local**: Laragon, MySQL en puerto `3307`.
-- **Producción**: Hostinger.
+- **Analytics**: GA4, ID `G-0CG4DEM9KS` (en `.env`).
+- **Entorno local**: **Docker** (Apache + PHP 8.2.30 + MariaDB 11.8.6 + phpMyAdmin). Reemplaza a Laragon. Ver `docs/DOCKER.md`.
+- **Producción**: Hostinger (shared hosting con SSH, `nz-estudiojuridicoinmobiliario.com`).
+- **CI/CD**: GitHub Actions → SSH/rsync a Hostinger en push a `production`. Ver `docs/DEPLOY.md`.
 
 ## 2. Estructura
 
 ```
 nz-estudio/
-├── admin/                 # Panel admin (CRUD propiedades)
-│   ├── admin.php          # Dashboard con stats
-│   ├── propiedades.php    # CRUD con DataTables + modal
-│   ├── categorias.php     # CRUD tipos de propiedad
-│   ├── vendidas.php       # Vista propiedades vendidas
+├── .github/
+│   ├── workflows/
+│   │   ├── deploy.yml         # Auto en push a production (5 etapas)
+│   │   └── redeploy.yml       # Manual con inputs from_sha/to_sha/mode
+│   └── scripts/deploy.sh      # Lógica modular --phase=config|read-sha|plan|execute|finalize
+├── admin/                     # Panel admin (CRUD propiedades)
+│   ├── admin.php              # Dashboard con stats
+│   ├── propiedades.php        # CRUD con DataTables + modal
+│   ├── categorias.php         # CRUD tipos de propiedad
+│   ├── vendidas.php           # Vista propiedades vendidas
 │   ├── order-propiedades.php  # Drag-drop reorden por categoría
-│   ├── controllers/       # Lógica de negocio (controller_propiedades.php, controller_categorias.php)
-│   ├── templates/         # modal_propiedad.php
-│   └── includes/          # head.php (sidebar+navbar, guard sesión), footer.php
+│   ├── controllers/           # Lógica (controller_propiedades.php, controller_categorias.php)
+│   ├── templates/             # modal_propiedad.php
+│   └── includes/              # head.php (sidebar+navbar, guard sesión), footer.php
 ├── assets/
-│   ├── css/  js/  scss/  img/  vendor/   # Bootstrap, AOS, jQuery, php-email-form
+│   ├── css/  js/  scss/  vendor/    # Bootstrap, AOS, jQuery, php-email-form
+│   └── img/
+│       ├── logo-original.svg        # Logo Giuliano Gerlo (texto blanco, footer dark)
+│       ├── logo-secundario.svg      # Logo Giuliano Gerlo (texto negro, footer claro)
+│       └── capua/                   # Imágenes proyecto Capua (slide-*, complejo-*, transition-*, ubicacion)
 ├── config/
-│   └── config.php         # Conexión DB (detecta local vs prod), API keys
+│   ├── env.php                # Loader propio de .env (sin Composer, sin parse_ini_file)
+│   └── config.php             # Lee de env(), detecta local vs prod por HTTP_HOST
+├── docs/
+│   └── DEPLOY.md              # Documentación CI/CD completa
 ├── includes/
-│   ├── head.php           # Header público, nav sticky, CDNs
-│   ├── head-meta.php      # Meta tags dinámicos SEO
-│   └── footer.php         # Footer + scripts
-├── templates/             # Secciones reusables del home
-│   ├── hero.php  about.php  services.php  contact-me.php  map.php
-├── uploads/propiedades/{categoria}/{id}/  # Imágenes WebP de propiedades
+│   ├── head.php               # Header público, nav sticky, CDNs (Bootstrap + GLightbox CSS)
+│   ├── head-meta.php          # Meta tags dinámicos SEO
+│   └── footer.php             # Footer + scripts (GLightbox JS init)
+├── templates/                 # Secciones reusables del home
+│   ├── hero.php  about.php  capua.php  services.php  contact-me.php  map.php
+├── uploads/propiedades/{categoria}/{id}/    # Imágenes WebP de propiedades (NO commitear)
 │
-├── index.php              # Home (compila hero+about+services+map+contact)
-├── propiedades.php        # Listado + filtros + buscador en vivo
-├── propiedad.php          # Detalle (carousel imgs, info, relacionadas)
-├── vendidas.php           # Archivo de vendidas
+├── index.php                  # Home: hero → about → capua → services → map → contact
+├── propiedades.php            # Listado + filtros + buscador en vivo
+├── propiedad.php              # Detalle (carousel imgs, info, relacionadas)
+├── vendidas.php               # Archivo de vendidas
 ├── login.php  auth.php  logout.php  404.php
-├── .htaccess              # URLs amigables
-└── u407412506_nzestudio.sql  # Dump completo
+├── .deployignore              # Patrones excluidos del deploy
+├── .env / .env.example        # Variables de entorno (.env NO commitear)
+├── .htaccess                  # URLs amigables + deny .env
+└── u407412506_nzestudio.sql   # Dump local (NO commitear)
 ```
 
 ## 3. Páginas públicas
@@ -110,11 +128,30 @@ Ej: `/propiedad55` → `propiedad.php?id=55`. `/inicio` → `index.php?seccion=i
 
 ## 9. Manejo de imágenes
 
+**Propiedades (admin):**
 - Multi-upload desde modal admin.
 - `convertToWebP()` en `admin/controllers/controller_propiedades.php` convierte JPG/PNG/GIF → WebP.
 - Path en disco: `uploads/propiedades/{categoria}/{id}/{uniqid}.webp`.
 - Solo la ruta relativa se guarda en `imagenes_propiedades.ruta_imagen`.
 - Al borrar propiedad, también se eliminan archivos físicos.
+- `uploads/` está en `.deployignore` → **el deploy NUNCA pisa imágenes subidas**.
+
+**Capua (sección publicitaria):**
+- Archivos en `assets/img/capua/`, cargados dinámicamente por `templates/capua.php` con `glob()`.
+- Convención de prefijos: `slide-*` (carrusel principal), `complejo-*` (galería expand-on-hover), `transition-*` (crossfade acumulativo), `ubicacion*` (imagen única).
+- Lightbox: GLightbox via CDN (CSS en `includes/head.php`, JS init en `includes/footer.php`).
+
+## 9b. Sección Capua de Edilizia (`templates/capua.php`)
+
+Bloque publicitario del proyecto Capua Funes (https://capuafunes.com.ar/) que el estudio tiene en cartera. Va en el home, después del `about`. Estructura interna en 5 sub-bloques:
+
+1. Carrusel principal Bootstrap (slides de propiedades/oficinas) + texto + chips + CTA al sitio oficial
+2. Crossfade acumulativo de 3 transition-*.jpg con `@keyframes capua-stack-2|3` (12s ciclo): img1 base siempre visible, img2 y img3 se montan encima
+3. Galería complejo-* en **image accordion**: 5 imágenes flush horizontales, hover expande (flex-grow 4) y oscurece las demás; en mobile cae a grid 2-3 col
+4. Grid de 10 amenities con bootstrap-icons (Piscina, Cocheras, Áreas verdes, Solarium, Laundry, Bauleras, Bicicleteros, Quincho, Gimnasio, Juegos)
+5. Bloque ubicacion.jpg + CTA outline a `google.com/maps/search/?api=1&query=Capua+Funes+Edilizia`
+
+CSS en `assets/css/main.css` (al final) y `assets/scss/sections/_capua.scss`. Paleta del sitio (`#3690e7` accent, `#2d465e` headings), NO la marrón de Capua.
 
 ## 10. Patrones de código a respetar
 
@@ -168,13 +205,84 @@ $.ajax({
 - SCSS sin pipeline de compilación automatizado en dev.
 - Sin cache headers para assets estáticos.
 
-## 13. Comandos / setup local
+## 13. Comandos / setup local (Docker)
 
-- Abrir vía Laragon: típicamente `http://nz-estudio.test`.
-- MySQL local en puerto `3307` (config Laragon).
-- Importar `u407412506_nzestudio.sql` a db `nz-estudio` antes de levantar.
+```bash
+# 1. Copiar variables de entorno
+cp .env.example .env
+
+# 2. Levantar todo (web + db + phpmyadmin)
+docker compose up -d --build
+
+# 3. Acceder
+#    Sitio:      http://localhost:8080
+#    phpMyAdmin: http://localhost:8081  (user: nz / pass: nzdev)
+
+# Comandos útiles
+docker compose logs -f web         # logs apache/php en vivo
+docker compose exec web bash       # shell dentro del container
+docker compose down                # parar (mantiene datos DB)
+docker compose down -v             # parar + borrar volumen DB (reimporta dump al subir)
+```
+
+El dump `db/nzestudio.sql` se importa automáticamente la primera vez (cuando el volumen `nz_db_data` está vacío). Para re-importar limpio: `docker compose down -v && docker compose up -d`.
+
+Detalles completos, troubleshooting y comandos avanzados en `docs/DOCKER.md`.
+
+## 13b. CI/CD a producción
+
+**Flujo**:
+1. Trabajás en `main` (commits libres, NO dispara nada).
+2. Mergeás a `production`: `git checkout production && git merge main && git push`.
+3. Push a `production` dispara `deploy.yml` automáticamente.
+
+**Workflow** (`.github/workflows/deploy.yml`): 5 etapas como steps separados (Configuración, Leer SHA, Plan, Deploy, Finalizar). Concurrency lock evita solape. Fail-fast: si un commit del lote falla, los siguientes no se intentan; el `.deployed_sha` queda en el último OK y el próximo push retoma desde ahí (auto-recovery).
+
+**Deploy.sh** (`.github/scripts/deploy.sh`): modular por `--phase=...`, state entre fases en `$RUNNER_TEMP/nz-deploy/state.env`. Con retry wrapper (3 intentos, backoff 5s/15s) y `ConnectTimeout=15` para tolerar glitches transitorios de Hostinger.
+
+**Redeploy manual** (`redeploy.yml`): `workflow_dispatch` con inputs `from_sha`, `to_sha`, `mode (sequential|bulk)`, `update_sha`. Útil para forzar full sync (`from_sha=INITIAL, mode=bulk`) o reaplicar commits específicos.
+
+**Secrets requeridos**: `SSH_HOST`, `SSH_PORT`, `SSH_USER`, `SSH_KEY`, `DEPLOY_PATH`.
+
+**Backup pre-deploy**: tar.gz de `public_html` (excluyendo `uploads/`) en `<DEPLOY_PATH>/../backups/YYYYMMDD_HHMMSS_<sha7>.tar.gz`. Rotación: últimos 5.
+
+**Doc completa**: `docs/DEPLOY.md`.
 
 ## 14. Preferencias
 
 - Borrar siempre archivos creados que ya no tengan uso (del CLAUDE.md global).
 - Idioma del proyecto y comunicación: **español**.
+- A futuro: migrar todo el sitio a **React** (proyecto pendiente, ver memoria del proyecto). Para fixes puntuales seguir en PHP. Refactors grandes evaluarlos a la luz de la migración futura.
+- **Commits los hace el usuario**, no Claude. Claude solo entrega el mensaje sugerido (Conventional Commits, ≤50 chars en el subject).
+
+## 15. CodeGraph MCP — reducir tokens
+
+Este proyecto tiene un servidor **CodeGraph MCP** configurado (`codegraph_*` tools). Es un grafo SQLite tree-sitter parseado de cada símbolo, edge y archivo. Lecturas sub-milisegundo. **Usar SIEMPRE codegraph antes que Grep/Read masivo** para preguntas estructurales.
+
+### Cuándo usar codegraph (no Grep)
+
+| Pregunta | Tool |
+|---|---|
+| "¿Dónde está definido X?" / "Buscar símbolo X" | `codegraph_search` |
+| "¿Qué llama a función Y?" | `codegraph_callers` |
+| "¿Qué llama Y?" | `codegraph_callees` |
+| "¿Cómo X llega a Y? / flow de X a Y" | `codegraph_trace` (una llamada = todo el path, incl. callbacks/JSX dinámicos) |
+| "¿Qué se rompería si cambio Z?" | `codegraph_impact` |
+| "Firma/source/docstring de Y" | `codegraph_node` |
+| "Contexto enfocado para tarea/área" | `codegraph_context` |
+| "Source de varios símbolos relacionados" | `codegraph_explore` |
+| "¿Qué archivos hay bajo path/?" | `codegraph_files` |
+| "¿Está sano el index?" | `codegraph_status` |
+
+### Reglas
+
+- **Responder directo, no delegar exploración.** Para "cómo funciona X" / preguntas de arquitectura: 2-3 llamadas codegraph (típicamente `codegraph_context` + 1 `codegraph_explore`). Codegraph YA es el índice — delegar a sub-agentes que graban + leen repite trabajo y cuesta más.
+- **Confiar en resultados de codegraph.** Vienen de AST parse completo. NO re-verificar con grep.
+- **No grep primero** cuando buscás un símbolo por nombre. `codegraph_search` es más rápido y trae kind+location+signature en una llamada.
+- **No encadenar `codegraph_search` + `codegraph_node`** para contexto — usar `codegraph_context` (una llamada).
+- **No loop `codegraph_node` sobre muchos símbolos** — usar `codegraph_explore` (una llamada agrupada).
+- **Index lag — chequear el banner de staleness.** Si la respuesta arranca con "⚠️ Some files referenced below were edited since the last index sync…", `Read` esos archivos para contenido fresh. Los demás archivos: codegraph es autoritativo.
+
+### Si `.codegraph/` no existe
+
+El MCP server responde "not initialized." Preguntar al usuario: *"Veo que el proyecto no tiene CodeGraph inicializado. ¿Querés que corra `codegraph init -i` para construir el índice?"*
