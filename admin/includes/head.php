@@ -1,9 +1,7 @@
 <?php
-// Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
+// Guard de admin: verifica sesión + timeout idle (1h por defecto).
+// Si caducó o no hay sesión, redirige a /login.php.
+nz_require_admin();
 
 // Obtener la página actual para marcar el menú activo
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -14,6 +12,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(nz_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
     <title>Panel de Administración - NZ Estudio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -30,6 +29,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     <!-- jQuery (necesario para DataTables) -->
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+
+    <!-- CSRF: inyecta X-CSRF-Token en todos los AJAX/fetch (debe ir después de jQuery) -->
+    <script src="assets/js/core/csrf.js"></script>
 </head>
 
 <body>

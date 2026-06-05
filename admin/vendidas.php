@@ -41,11 +41,11 @@ $resultado = $db->query($query);
                     <tbody>
                         <?php while ($propiedad = $resultado->fetch_assoc()): ?>
                             <tr>
-                                <td class="text-center align-middle"><?php echo $propiedad['id']; ?></td>
+                                <td class="text-center align-middle"><?php echo (int)$propiedad['id']; ?></td>
                                 <td>
                                     <div class="property-image-wrapper">
                                         <?php if ($propiedad['imagen_principal']): ?>
-                                            <img src="../<?php echo $propiedad['imagen_principal']; ?>"
+                                            <img src="../<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
                                                  alt="Imagen de propiedad"
                                                  class="property-image">
                                         <?php else: ?>
@@ -65,12 +65,12 @@ $resultado = $db->query($query);
                                 <td class="text-center align-middle">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-info" 
-                                                onclick="verPropiedad(<?php echo $propiedad['id']; ?>)"
+                                                onclick="verPropiedad(<?php echo (int)$propiedad['id']; ?>)"
                                                 title="Ver">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger" 
-                                                onclick="confirmarEliminacionVendida(<?php echo $propiedad['id']; ?>)"
+                                                onclick="confirmarEliminacionVendida(<?php echo (int)$propiedad['id']; ?>)"
                                                 title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -226,7 +226,23 @@ function confirmarEliminacionVendida(id) {
                 cancelButtonText: 'Cancelar'
             }).then((res2) => {
                 if (res2.isConfirmed) {
-                    window.location.href = 'controllers/controller_propiedades.php?action=eliminar&id=' + id;
+                    $.ajax({
+                        url: 'controllers/controller_propiedades.php',
+                        type: 'POST',
+                        data: { action: 'eliminar', id: id },
+                        success: function(response) {
+                            const data = typeof response === 'string' ? JSON.parse(response) : response;
+                            if (data.success) {
+                                Swal.fire('¡Eliminado!', 'Propiedad eliminada', 'success')
+                                    .then(() => location.reload());
+                            } else {
+                                Swal.fire('Error', data.message || 'Error al eliminar', 'error');
+                            }
+                        },
+                        error: function() {
+                            Swal.fire('Error', 'No se pudo comunicar con el servidor', 'error');
+                        }
+                    });
                 }
             });
         }

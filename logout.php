@@ -1,22 +1,24 @@
 <?php
-session_start();
+require_once 'config/config.php';
 
-// Destruir todas las variables de sesión
-$_SESSION = array();
+// Limpiar variables de sesión
+$_SESSION = [];
 
-// Si se desea destruir la sesión completamente, borra también la cookie de sesión.
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
+// Borrar cookie de sesión si la hay
+if (ini_get('session.use_cookies')) {
+    $p = session_get_cookie_params();
+    setcookie(
+        session_name(),
+        '',
+        time() - 42000,
+        $p['path'],
+        $p['domain'],
+        $p['secure'],
+        $p['httponly']
     );
 }
 
-// Finalmente, destruir la sesión
 session_destroy();
 
-// Redirigir al login con mensaje de éxito
 header('Location: login.php?logout=1');
 exit;
-?>

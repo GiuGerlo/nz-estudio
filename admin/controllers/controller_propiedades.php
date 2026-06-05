@@ -1,10 +1,8 @@
 <?php
 require_once '../../config/config.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../../login.php');
-    exit;
-}
+// Guard: cualquier acceso (POST o GET) requiere sesión válida; responde JSON 401 si no.
+nz_require_admin_ajax();
 
 // Función para enviar respuesta JSON
 function sendJsonResponse($success, $message, $data = null)
@@ -18,45 +16,61 @@ function sendJsonResponse($success, $message, $data = null)
     exit;
 }
 
-function convertToWebP($source, $destination, $quality = 80)
+function convertToWebP($source, $destination, $quality = 82)
 {
-    $info = getimagesize($source);
-    $isValid = true;
+    // Validar mime real con finfo (no confiar en metadata del cliente ni en getimagesize)
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($source) ?: '';
 
-    if ($info['mime'] === 'image/jpeg') {
-        $image = imagecreatefromjpeg($source);
-    } elseif ($info['mime'] === 'image/png') {
-        $image = imagecreatefrompng($source);
-        imagepalettetotruecolor($image);
-        imagealphablending($image, true);
-        imagesavealpha($image, true);
-    } elseif ($info['mime'] === 'image/gif') {
-        $image = imagecreatefromgif($source);
-    } else {
-        $isValid = false;
+    $image = null;
+    switch ($mime) {
+        case 'image/jpeg':
+            $image = @imagecreatefromjpeg($source);
+            break;
+        case 'image/png':
+            $image = @imagecreatefrompng($source);
+            if ($image) {
+                imagepalettetotruecolor($image);
+                imagealphablending($image, true);
+                imagesavealpha($image, true);
+            }
+            break;
+        case 'image/gif':
+            $image = @imagecreatefromgif($source);
+            break;
+        case 'image/webp':
+            $image = @imagecreatefromwebp($source);
+            break;
+        default:
+            return false;
     }
 
-    if ($isValid) {
-        // Crear el directorio si no existe
-        $dir = dirname($destination);
-        if (!file_exists($dir)) {
-            mkdir($dir, 0777, true);
-        }
+    if (!$image) {
+        return false;
+    }
 
-        // Convertir y guardar como WebP
-        $result = imagewebp($image, $destination, $quality);
+    // Asegurar el directorio destino (idempotente)
+    $dir = dirname($destination);
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
         imagedestroy($image);
-        return $result;
+        return false;
     }
-    return false;
+
+    $result = imagewebp($image, $destination, $quality);
+    imagedestroy($image);
+    return $result;
 }
 
 // Si es una petición POST, procesar el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verificar CSRF antes de cualquier mutación
+    nz_csrf_require();
+
     // Obtener el contenido raw del POST para solicitudes JSON
     $input = json_decode(file_get_contents('php://input'), true);
+    $action = $input['action'] ?? $_POST['action'] ?? '';
 
-    if (isset($input['action']) && $input['action'] === 'update_order') {
+    if ($action === 'update_order') {
         try {
             if (!isset($input['orden']) || !is_array($input['orden'])) {
                 throw new Exception('Datos de orden inválidos');
@@ -85,29 +99,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Eliminar propiedad (antes era GET → vulnerable a CSRF)
+    if ($action === 'eliminar') {
+        try {
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                throw new Exception('ID inválido');
+            }
+
+            // Borrar archivos físicos de imágenes
+            $stmt = $db->prepare("SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            while ($img = $res->fetch_assoc()) {
+                $path = '../../' . $img['ruta_imagen'];
+                if (is_file($path)) {
+                    @unlink($path);
+                }
+            }
+
+            // Borrar registros (FK no en cascada → manual)
+            $stmt = $db->prepare("DELETE FROM imagenes_propiedades WHERE id_propiedad = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+
+            $stmt = $db->prepare("DELETE FROM propiedades WHERE id = ?");
+            $stmt->bind_param('i', $id);
+            if (!$stmt->execute()) {
+                throw new Exception('Error al eliminar la propiedad');
+            }
+
+            sendJsonResponse(true, 'Propiedad eliminada correctamente');
+        } catch (Exception $e) {
+            sendJsonResponse(false, 'Error: ' . $e->getMessage());
+        }
+        exit;
+    }
+
+    // Marcar propiedad como vendida (antes era GET → vulnerable a CSRF)
+    if ($action === 'vender') {
+        try {
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id <= 0) {
+                throw new Exception('ID inválido');
+            }
+            $stmt = $db->prepare("UPDATE propiedades SET vendida = 1 WHERE id = ?");
+            $stmt->bind_param('i', $id);
+            if (!$stmt->execute()) {
+                throw new Exception('Error al marcar como vendida');
+            }
+            sendJsonResponse(true, 'Propiedad marcada como vendida');
+        } catch (Exception $e) {
+            sendJsonResponse(false, 'Error: ' . $e->getMessage());
+        }
+        exit;
+    }
+
+    // Eliminar una imagen individual (lo llama el modal de edición)
+    if ($action === 'eliminar_imagen') {
+        try {
+            $img_id = (int)($_POST['id'] ?? 0);
+            if ($img_id <= 0) {
+                throw new Exception('ID inválido');
+            }
+            $stmt = $db->prepare("SELECT ruta_imagen FROM imagenes_propiedades WHERE id = ?");
+            $stmt->bind_param('i', $img_id);
+            $stmt->execute();
+            $row = $stmt->get_result()->fetch_assoc();
+            if (!$row) {
+                throw new Exception('Imagen no encontrada');
+            }
+            $path = '../../' . $row['ruta_imagen'];
+            if (is_file($path)) {
+                @unlink($path);
+            }
+            $stmt = $db->prepare("DELETE FROM imagenes_propiedades WHERE id = ?");
+            $stmt->bind_param('i', $img_id);
+            if (!$stmt->execute()) {
+                throw new Exception('Error al borrar el registro');
+            }
+            sendJsonResponse(true, 'Imagen eliminada');
+        } catch (Exception $e) {
+            sendJsonResponse(false, 'Error: ' . $e->getMessage());
+        }
+        exit;
+    }
+
+    // Default: crear o editar propiedad (form principal del modal)
     try {
-        $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
-        $titulo = $db->real_escape_string($_POST['titulo']);
-        $categoria = (int)$_POST['categoria'];
-        $localidad = $db->real_escape_string($_POST['localidad']);
-        $ubicacion = $db->real_escape_string($_POST['ubicacion']);
-        $tamanio = $db->real_escape_string($_POST['tamanio']);
-        $servicios = $db->real_escape_string($_POST['servicios']);
-        $caracteristicas = $db->real_escape_string($_POST['caracteristicas']);
-        $mapa = $_POST['mapa'];
-        $latitud = isset($_POST['latitud']) ? $db->real_escape_string($_POST['latitud']) : null;
-        $longitud = isset($_POST['longitud']) ? $db->real_escape_string($_POST['longitud']) : null;
+        $id              = isset($_POST['id']) ? (int)$_POST['id'] : null;
+        $titulo          = trim($_POST['titulo'] ?? '');
+        $categoria       = (int)($_POST['categoria'] ?? 0);
+        $localidad       = trim($_POST['localidad'] ?? '');
+        $ubicacion       = trim($_POST['ubicacion'] ?? '');
+        $tamanio         = trim($_POST['tamanio'] ?? '');
+        $servicios       = trim($_POST['servicios'] ?? '');
+        $caracteristicas = trim($_POST['caracteristicas'] ?? '');
+        $mapa            = $_POST['mapa'] ?? '';
+
+        // Validaciones mínimas
+        if ($titulo === '') {
+            throw new Exception('El título es obligatorio');
+        }
+        if ($categoria <= 0) {
+            throw new Exception('Categoría inválida');
+        }
+
+        // Lat/Lng son DECIMAL en la DB → '' debe ir como NULL.
+        $lat = trim($_POST['latitud']  ?? '');
+        $lng = trim($_POST['longitud'] ?? '');
+        $latitud  = ($lat === '' ? null : (float)$lat);
+        $longitud = ($lng === '' ? null : (float)$lng);
 
         if ($id) {
             // Actualizar propiedad existente
-            $query = "UPDATE propiedades SET 
+            $query = "UPDATE propiedades SET
                      categoria = ?, titulo = ?, localidad = ?, ubicacion = ?,
                      tamanio = ?, servicios = ?, caracteristicas = ?, mapa = ?,
                      latitud = ?, longitud = ?
                      WHERE id = ?";
             $stmt = $db->prepare($query);
             $stmt->bind_param(
-                "isssssssssi",
+                "isssssssddi",
                 $categoria,
                 $titulo,
                 $localidad,
@@ -122,12 +236,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
         } else {
             // Insertar nueva propiedad
-            $query = "INSERT INTO propiedades 
+            $query = "INSERT INTO propiedades
                      (categoria, titulo, localidad, ubicacion, tamanio, servicios, caracteristicas, mapa, latitud, longitud)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $db->prepare($query);
             $stmt->bind_param(
-                "isssssssss",
+                "isssssssdd",
                 $categoria,
                 $titulo,
                 $localidad,
@@ -154,29 +268,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $categoria_nombre = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $categoria_nombre));
 
             // Procesar imágenes si se enviaron
+            $upload_errors = [];
+            $uploaded_count = 0;
+
             if (!empty($_FILES['imagenes']['name'][0])) {
-                // Crear estructura de directorios
-                $base_dir = '../../uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id;
-                if (!file_exists($base_dir)) {
-                    mkdir($base_dir, 0777, true);
+                $max_files     = 20;             // límite duro por request
+                $max_bytes     = 8 * 1024 * 1024; // 8MB por archivo
+                $allowed_mimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                $allowed_exts  = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+                $total_files = count($_FILES['imagenes']['name']);
+                if ($total_files > $max_files) {
+                    throw new Exception("Demasiadas imágenes (máx $max_files por subida).");
                 }
 
-                foreach ($_FILES['imagenes']['tmp_name'] as $key => $tmp_name) {
-                    if ($_FILES['imagenes']['error'][$key] === 0) {
-                        $filename = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9.]/', '_', $_FILES['imagenes']['name'][$key]);
-                        $webp_filename = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
-                        $uploadFile = $base_dir . '/' . $webp_filename;
+                // Crear estructura de directorios (0755: dueño rw+x, resto r+x)
+                $base_dir = '../../uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id;
+                if (!is_dir($base_dir) && !mkdir($base_dir, 0755, true) && !is_dir($base_dir)) {
+                    throw new Exception('No se pudo crear el directorio de imágenes.');
+                }
 
-                        if (convertToWebP($tmp_name, $uploadFile)) {
-                            $ruta_imagen = 'uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id . '/' . $webp_filename;
-                            $db->query("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen) 
-                                      VALUES ($propiedad_id, '$ruta_imagen')");
-                        }
+                $stmt_img = $db->prepare("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen) VALUES (?, ?)");
+
+                for ($i = 0; $i < $total_files; $i++) {
+                    // Armar struct $_FILES individual para nz_validate_upload
+                    $file = [
+                        'name'     => $_FILES['imagenes']['name'][$i]     ?? '',
+                        'type'     => $_FILES['imagenes']['type'][$i]     ?? '',
+                        'tmp_name' => $_FILES['imagenes']['tmp_name'][$i] ?? '',
+                        'error'    => $_FILES['imagenes']['error'][$i]    ?? UPLOAD_ERR_NO_FILE,
+                        'size'     => $_FILES['imagenes']['size'][$i]     ?? 0,
+                    ];
+
+                    $check = nz_validate_upload($file, [
+                        'max_bytes'     => $max_bytes,
+                        'allowed_mimes' => $allowed_mimes,
+                        'allowed_exts'  => $allowed_exts,
+                    ]);
+
+                    if (!$check['ok']) {
+                        $upload_errors[] = ($file['name'] ?: 'archivo') . ': ' . $check['reason'];
+                        continue;
+                    }
+
+                    // Nombre final: random + sanitized base + .webp (anti path-traversal)
+                    $safe_base    = nz_sanitize_filename(pathinfo($file['name'], PATHINFO_FILENAME));
+                    $webp_name    = bin2hex(random_bytes(8)) . '_' . $safe_base . '.webp';
+                    $dest_path    = $base_dir . '/' . $webp_name;
+                    $ruta_imagen  = 'uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id . '/' . $webp_name;
+
+                    if (convertToWebP($file['tmp_name'], $dest_path)) {
+                        $stmt_img->bind_param('is', $propiedad_id, $ruta_imagen);
+                        $stmt_img->execute();
+                        $uploaded_count++;
+                    } else {
+                        $upload_errors[] = $file['name'] . ': error al convertir a WebP.';
                     }
                 }
             }
 
-            sendJsonResponse(true, 'Propiedad guardada exitosamente');
+            $msg = 'Propiedad guardada exitosamente';
+            if ($uploaded_count > 0) {
+                $msg .= " ($uploaded_count imagen(es) subida(s))";
+            }
+            if (!empty($upload_errors)) {
+                $msg .= '. Avisos: ' . implode(' | ', $upload_errors);
+            }
+            sendJsonResponse(true, $msg);
         } else {
             sendJsonResponse(false, 'Error al guardar la propiedad');
         }
@@ -233,71 +391,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             break;
 
+        // Compatibilidad: si alguien llega a estas acciones por GET,
+        // bloquear con 405 (deben usarse vía POST con CSRF token).
         case 'eliminar':
-            if (isset($_GET['id'])) {
-                $id = (int)$_GET['id'];
-
-                // Primero eliminar las imágenes asociadas
-                $queryImagenes = "SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = ?";
-                $stmtImagenes = $db->prepare($queryImagenes);
-                $stmtImagenes->bind_param("i", $id);
-                $stmtImagenes->execute();
-                $resultImagenes = $stmtImagenes->get_result();
-
-                while ($imagen = $resultImagenes->fetch_assoc()) {
-                    if (file_exists("../../" . $imagen['ruta_imagen'])) {
-                        unlink("../../" . $imagen['ruta_imagen']);
-                    }
-                }
-
-                // Eliminar registros de imágenes
-                $db->query("DELETE FROM imagenes_propiedades WHERE id_propiedad = $id");
-
-                // Eliminar la propiedad
-                if ($db->query("DELETE FROM propiedades WHERE id = $id")) {
-                    $_SESSION['alert'] = [
-                        'type' => 'success',
-                        'message' => 'Propiedad eliminada correctamente'
-                    ];
-                } else {
-                    $_SESSION['alert'] = [
-                        'type' => 'error',
-                        'message' => 'Error al eliminar la propiedad'
-                    ];
-                }
-            }
-            break;
-
         case 'vender':
-            if (isset($_GET['id'])) {
-                $id = (int)$_GET['id'];
-
-                try {
-                    // Iniciar transacción
-                    $db->begin_transaction();
-
-                    // Actualizar el campo 'vendida' a 1
-                    $query = "UPDATE propiedades SET vendida = 1 WHERE id = ?";
-                    $stmt = $db->prepare($query);
-                    $stmt->bind_param("i", $id);
-
-                    if ($stmt->execute()) {
-                        $db->commit();
-                        $_SESSION['alert'] = [
-                            'type' => 'success',
-                            'message' => 'Propiedad marcada como vendida correctamente'
-                        ];
-                    } else {
-                        throw new Exception('Error al actualizar el estado de la propiedad');
-                    }
-                } catch (Exception $e) {
-                    $db->rollback();
-                    $_SESSION['alert'] = [
-                        'type' => 'error',
-                        'message' => 'Error al marcar la propiedad como vendida: ' . $e->getMessage()
-                    ];
-                }
-            }
+            http_response_code(405);
+            sendJsonResponse(false, 'Método no permitido. Usar POST con CSRF token.');
             break;
     }
 

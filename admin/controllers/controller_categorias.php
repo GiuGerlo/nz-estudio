@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
+// Guard: requiere sesión válida; responde JSON 401 si no.
+nz_require_admin_ajax();
+
 /**
  * Controlador para la gestión de categorías de propiedades
  */
@@ -174,6 +177,9 @@ class ControllerCategorias {
 
 // Procesamiento de solicitudes AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
+    // Verificar CSRF antes de cualquier mutación
+    nz_csrf_require();
+
     $controller = new ControllerCategorias($db);
     $resultado = null;
     

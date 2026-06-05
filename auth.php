@@ -9,6 +9,9 @@ try {
         throw new Exception('Método no permitido');
     }
 
+    // Verificar token CSRF antes de cualquier procesamiento
+    nz_csrf_require();
+
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'] ?? '';
 
@@ -27,9 +30,13 @@ try {
         throw new Exception('Credenciales inválidas');
     }
 
+    // Regenerar ID de sesión para evitar session fixation
+    session_regenerate_id(true);
+
     // Iniciar sesión
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_email'] = $user['email'];
+    $_SESSION['last_activity'] = time();
 
     $response = [
         'success' => true,

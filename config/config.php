@@ -1,6 +1,21 @@
 <?php
-// Iniciar sesión solo si es necesario y si no se mandaron headers
+// ─── Hardening de sesión ──────────────────────────────────────────────
+// Debe aplicarse ANTES de session_start(). Si la sesión ya estaba iniciada
+// (otro archivo más arriba en la pila), estos ini_set no aplican — por eso
+// config/config.php debe ser el primer require en cada entrypoint.
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    $secure = (
+        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+    );
+
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    if ($secure) {
+        ini_set('session.cookie_secure', '1');
+    }
     session_start();
 }
 
@@ -47,3 +62,9 @@ $db->set_charset("utf8mb4");
 // Constantes de servicios externos
 define('GOOGLE_MAPS_API_KEY', env('GOOGLE_MAPS_API_KEY', ''));
 define('GOOGLE_ANALYTICS_ID', env('GOOGLE_ANALYTICS_ID', ''));
+
+// Helpers de seguridad: CSRF, headers, guard de admin, validate_upload, etc.
+require_once __DIR__ . '/../includes/security.php';
+
+// Aplicar headers seguros en TODAS las respuestas (públicas + admin + JSON).
+nz_set_secure_headers();

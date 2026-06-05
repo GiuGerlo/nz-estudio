@@ -287,6 +287,9 @@ include_once 'includes/head.php';
                         </h3>
                         <div class="responsive-map">
                             <?php
+                            // El campo `mapa` es HTML crudo (iframe de Google Maps) cargado por admin.
+                            // TODO: validar que el iframe sea de google.com/maps y limpiar atributos
+                            // peligrosos en la próxima fase. Hoy: admin único y trusted.
                             $mapa_limpio = str_replace('\&quot;', '"', $propiedad['mapa']);
                             echo html_entity_decode(stripslashes($mapa_limpio));
                             ?>

@@ -51,11 +51,11 @@ $resultado = $db->query($query);
                     <tbody>
                         <?php while ($propiedad = $resultado->fetch_assoc()): ?>
                             <tr>
-                                <td class="text-center align-middle"><?php echo $propiedad['id']; ?></td>
+                                <td class="text-center align-middle"><?php echo (int)$propiedad['id']; ?></td>
                                 <td>
                                     <div class="property-image-wrapper">
                                         <?php if ($propiedad['imagen_principal']): ?>
-                                            <img src="../<?php echo $propiedad['imagen_principal']; ?>"
+                                            <img src="../<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
                                                  alt="Imagen de propiedad"
                                                  class="property-image">
                                         <?php else: ?>
@@ -75,17 +75,17 @@ $resultado = $db->query($query);
                                 <td class="text-center align-middle">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-primary" 
-                                                onclick="editarPropiedad(<?php echo $propiedad['id']; ?>)"
+                                                onclick="editarPropiedad(<?php echo (int)$propiedad['id']; ?>)"
                                                 title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger" 
-                                                onclick="confirmarEliminacion(<?php echo $propiedad['id']; ?>)"
+                                                onclick="confirmarEliminacion(<?php echo (int)$propiedad['id']; ?>)"
                                                 title="Eliminar">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-success" 
-                                                onclick="marcarVendida(<?php echo $propiedad['id']; ?>)"
+                                                onclick="marcarVendida(<?php echo (int)$propiedad['id']; ?>)"
                                                 title="Marcar como vendida">
                                             <i class="fas fa-check"></i>
                                         </button>
@@ -275,6 +275,25 @@ $resultado = $db->query($query);
         });
     });
 
+    function postAction(action, id, onOk) {
+        $.ajax({
+            url: 'controllers/controller_propiedades.php',
+            type: 'POST',
+            data: { action: action, id: id },
+            success: function(response) {
+                let data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    onOk(data);
+                } else {
+                    Swal.fire('Error', data.message || 'Operación fallida', 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'No se pudo comunicar con el servidor', 'error');
+            }
+        });
+    }
+
     function confirmarEliminacion(id) {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -287,7 +306,10 @@ $resultado = $db->query($query);
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = 'controllers/controller_propiedades.php?action=eliminar&id=' + id;
+                postAction('eliminar', id, () => {
+                    Swal.fire('¡Eliminado!', 'Propiedad eliminada correctamente', 'success')
+                        .then(() => location.reload());
+                });
             }
         });
     }
@@ -304,7 +326,10 @@ $resultado = $db->query($query);
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = 'controllers/controller_propiedades.php?action=vender&id=' + id;
+                postAction('vender', id, () => {
+                    Swal.fire('¡Listo!', 'Propiedad marcada como vendida', 'success')
+                        .then(() => location.reload());
+                });
             }
         });
     }

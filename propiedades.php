@@ -81,9 +81,12 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
     <div class="categories-container">
         <?php
         $categorias->data_seek(0);
+        // Prepared statement reusable: el filtro por categoría va por bind, no por concatenación.
+        $stmt_props = $db->prepare($base_query . " AND p.categoria = ? ORDER BY p.orden ASC, p.id DESC");
         while ($categoria = $categorias->fetch_assoc()):
-            $query = $base_query . " AND p.categoria = " . $categoria['id'] . " ORDER BY p.orden ASC, p.id DESC";
-            $propiedades = $db->query($query);
+            $stmt_props->bind_param('i', $categoria['id']);
+            $stmt_props->execute();
+            $propiedades = $stmt_props->get_result();
             if ($propiedades->num_rows > 0):
         ?>
             <div class="category-section" data-category="<?php echo $categoria['id']; ?>">
@@ -96,7 +99,7 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
                             <div class="property-card">
                                 <div class="property-image">
                                     <?php if ($propiedad['imagen_principal']): ?>
-                                        <img src="<?php echo $propiedad['imagen_principal']; ?>"
+                                        <img src="<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
                                             alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>">
                                     <?php else: ?>
                                         <img src="assets/img/no-image.jpg" alt="Sin imagen">

@@ -30,6 +30,7 @@ LICENSE
 .windsurf/
 .claude/
 .agents/
+.mcp.json
 skills-lock.json
 
 # Docker (solo para desarrollo local, jamás llegan a Hostinger)

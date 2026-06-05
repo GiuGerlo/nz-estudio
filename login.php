@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once 'config/config.php';
+
 if (isset($_SESSION['user_id'])) {
     header('Location: inicio');
     exit;
@@ -23,6 +24,7 @@ include 'includes/head.php';
                             </div>
 
                             <form id="loginForm" action="auth.php" method="POST" class="needs-validation" novalidate>
+                                <?php echo nz_csrf_field(); ?>
                                 <div class="input-group">
                                     <label for="email" class="form-label">Correo Electrónico</label>
                                     <div class="input-group">

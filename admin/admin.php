@@ -122,11 +122,11 @@ include_once 'includes/head.php';
                                     <?php if ($ultimasPropiedades && $ultimasPropiedades->num_rows > 0): ?>
                                         <?php while ($propiedad = $ultimasPropiedades->fetch_assoc()): ?>
                                             <tr>
-                                                <td><?php echo $propiedad['id']; ?></td>
+                                                <td><?php echo (int)$propiedad['id']; ?></td>
                                                 <td><?php echo htmlspecialchars($propiedad['titulo']); ?></td>
                                                 <td><?php echo htmlspecialchars($propiedad['localidad']); ?></td>
                                                 <td>
-                                                    <a href="../propiedad<?php echo $propiedad['id']; ?>" class="btn btn-sm btn-custom-blue" target="_blank"><i class="fas fa-eye"></i></a>
+                                                    <a href="../propiedad<?php echo (int)$propiedad['id']; ?>" class="btn btn-sm btn-custom-blue" target="_blank"><i class="fas fa-eye"></i></a>
                                                 </td>
                                             </tr>
                                         <?php endwhile; ?>

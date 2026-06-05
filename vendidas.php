@@ -43,7 +43,7 @@ $propiedades = $db->query($query);
                         <div class="property-card">
                             <div class="property-image">
                                 <?php if ($propiedad['imagen_principal']): ?>
-                                    <img src="<?php echo $propiedad['imagen_principal']; ?>"
+                                    <img src="<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
                                          alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>">
                                 <?php else: ?>
                                     <img src="assets/img/no-image.jpg" alt="Sin imagen">

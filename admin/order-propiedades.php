@@ -22,22 +22,22 @@ $categorias = $db->query($query_categorias);
     </div>
 
     <div class="row">
-        <?php while ($categoria = $categorias->fetch_assoc()): ?>
+        <?php
+        $stmt_props_orden = $db->prepare("SELECT id, titulo, orden FROM propiedades WHERE categoria = ? ORDER BY orden ASC, id DESC");
+        while ($categoria = $categorias->fetch_assoc()):
+            $stmt_props_orden->bind_param('i', $categoria['id']);
+            $stmt_props_orden->execute();
+            $propiedades = $stmt_props_orden->get_result();
+        ?>
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header bg-light">
                         <h5 class="mb-0"><?php echo htmlspecialchars($categoria['nombre_categoria']); ?></h5>
                     </div>
                     <div class="card-body">
-                        <ul class="list-group sortable" data-categoria="<?php echo $categoria['id']; ?>">
-                            <?php
-                            $query_propiedades = "SELECT id, titulo, orden FROM propiedades 
-                                                WHERE categoria = {$categoria['id']} 
-                                                ORDER BY orden ASC, id DESC";
-                            $propiedades = $db->query($query_propiedades);
-                            while ($propiedad = $propiedades->fetch_assoc()):
-                            ?>
-                                <li class="list-group-item" data-id="<?php echo $propiedad['id']; ?>">
+                        <ul class="list-group sortable" data-categoria="<?php echo (int)$categoria['id']; ?>">
+                            <?php while ($propiedad = $propiedades->fetch_assoc()): ?>
+                                <li class="list-group-item" data-id="<?php echo (int)$propiedad['id']; ?>">
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-grip-vertical me-3 text-muted handle"></i>
                                         <span><?php echo htmlspecialchars($propiedad['titulo']); ?></span>
