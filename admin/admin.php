@@ -10,7 +10,7 @@ $totalImagenes    = (int)$db->query("SELECT COUNT(*) AS t FROM imagenes_propieda
 // Últimas propiedades agregadas (con imagen principal)
 $ultimasPropiedades = $db->query(
     "SELECT p.id, p.titulo, p.localidad, tp.nombre_categoria,
-            (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id LIMIT 1) AS imagen
+            (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) AS imagen
      FROM propiedades p
      LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id
      WHERE p.vendida = 0

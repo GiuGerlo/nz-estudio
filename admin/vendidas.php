@@ -5,7 +5,7 @@ require_once 'includes/head.php';
 
 // Obtener las propiedades vendidas
 $query = "SELECT p.*, tp.nombre_categoria, 
-         (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id LIMIT 1) as imagen_principal
+         (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) as imagen_principal
          FROM propiedades p 
          LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id 
          WHERE vendida = 1

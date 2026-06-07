@@ -3,7 +3,7 @@ require_once 'config/config.php';
 
 // Consulta para obtener todas las propiedades con coordenadas y su primera imagen
 $query = "SELECT p.*, t.nombre_categoria, 
-          (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY id ASC LIMIT 1) as imagen
+          (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) as imagen
           FROM propiedades p 
           LEFT JOIN tipos_propiedad t ON p.categoria = t.id 
           WHERE p.latitud IS NOT NULL AND p.longitud IS NOT NULL 

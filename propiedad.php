@@ -28,7 +28,7 @@ if ($result->num_rows === 0) {
 $propiedad = $result->fetch_assoc();
 
 // Obtener todas las imágenes de la propiedad
-$images_query = "SELECT * FROM imagenes_propiedades WHERE id_propiedad = ? ORDER BY id ASC";
+$images_query = "SELECT * FROM imagenes_propiedades WHERE id_propiedad = ? ORDER BY orden ASC, id ASC";
 $images_stmt = $db->prepare($images_query);
 $images_stmt->bind_param("i", $id);
 $images_stmt->execute();
@@ -37,7 +37,7 @@ $imagenes = $images_result->fetch_all(MYSQLI_ASSOC);
 
 // Obtener propiedades relacionadas (misma categoría)
 $related_query = "SELECT p.*, tp.nombre_categoria,
-                  (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id LIMIT 1) as imagen_principal
+                  (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) as imagen_principal
                   FROM propiedades p 
                   LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id
                   WHERE p.categoria = ? AND p.id != ? AND p.vendida = 0 

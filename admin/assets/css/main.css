@@ -8,6 +8,8 @@
 @import url('./components/sidebar.css');
 @import url('./components/navbar.css');
 @import url('./components/card.css');
+@import url('./components/form.css');
+@import url('./components/modal.css');
 
 /* ─── Reset suave para no chocar con Bootstrap ───────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
@@ -121,17 +123,89 @@ hr { border-color: var(--nz-border); }
 
 .form-floating > label { color: var(--nz-text-muted); }
 
-/* DataTables (compat — se afina en 3c) */
+/* ─── DataTables restyling ──────────────────────────────────────── */
+.dataTables_wrapper {
+    color: var(--nz-text);
+    font-size: var(--nz-fs-base);
+}
+
 .dataTables_wrapper .dataTables_filter input,
 .dataTables_wrapper .dataTables_length select {
-    border-color: var(--nz-border);
+    border: 1.5px solid var(--nz-border);
     border-radius: var(--nz-radius-sm);
-    padding: 6px 10px;
+    padding: 7px 12px;
+    background: var(--nz-surface);
+    color: var(--nz-text);
+    font-size: var(--nz-fs-sm);
+    transition: border-color var(--nz-transition), box-shadow var(--nz-transition);
+}
+
+.dataTables_wrapper .dataTables_filter input:focus,
+.dataTables_wrapper .dataTables_length select:focus {
+    outline: 0;
+    border-color: var(--nz-primary);
+    box-shadow: 0 0 0 3px rgba(44, 95, 135, .12);
+}
+
+.dataTables_wrapper .dataTables_filter label,
+.dataTables_wrapper .dataTables_length label {
+    color: var(--nz-text-muted);
+    font-size: var(--nz-fs-sm);
+    font-weight: 500;
+}
+
+.dataTables_wrapper table.dataTable {
+    border-collapse: collapse !important;
+    width: 100% !important;
+}
+
+.dataTables_wrapper table.dataTable thead th {
+    background: var(--nz-surface-2);
+    border-top: 1px solid var(--nz-border);
+    border-bottom: 1px solid var(--nz-border);
+    color: var(--nz-text-muted);
+    font-weight: 600;
+    font-size: var(--nz-fs-xs);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: var(--nz-sp-3) var(--nz-sp-4);
+}
+
+.dataTables_wrapper table.dataTable tbody td {
+    padding: var(--nz-sp-3) var(--nz-sp-4);
+    border-bottom: 1px solid var(--nz-border);
+    vertical-align: middle;
+}
+
+.dataTables_wrapper table.dataTable tbody tr:hover {
+    background: var(--nz-surface-2);
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     border-radius: var(--nz-radius-sm) !important;
-    margin: 0 2px;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid var(--nz-border) !important;
+    background: var(--nz-surface) !important;
+    color: var(--nz-text-muted) !important;
+    font-weight: 500;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: var(--nz-fs-sm);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button i {
+    font-size: .82rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--nz-primary-soft) !important;
+    color: var(--nz-primary) !important;
+    border-color: var(--nz-primary) !important;
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
@@ -139,4 +213,67 @@ hr { border-color: var(--nz-border); }
     background: var(--nz-primary) !important;
     border-color: var(--nz-primary) !important;
     color: white !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    opacity: .4;
+    cursor: not-allowed !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: var(--nz-text-muted);
+    font-size: var(--nz-fs-sm);
+    padding-top: var(--nz-sp-3) !important;
+}
+
+/* Pill de categoría — wrap si es largo, no overflow */
+.nz-cat-pill {
+    display: inline-block;
+    font-size: var(--nz-fs-xs);
+    font-weight: 600;
+    color: var(--nz-primary);
+    background: var(--nz-primary-soft);
+    padding: 4px 10px;
+    border-radius: var(--nz-radius-pill);
+    line-height: 1.4;
+    max-width: 100%;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+/* Botones de acción inline en la tabla */
+.nz-table-actions {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* ─── DataTables layout custom (toolbar arriba/abajo) ─────────────── */
+.nz-dt-top, .nz-dt-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nz-sp-3);
+    flex-wrap: wrap;
+}
+
+.nz-dt-top { margin-bottom: var(--nz-sp-4); }
+.nz-dt-bottom { margin-top: var(--nz-sp-4); }
+
+.nz-dt-top-left, .nz-dt-top-right,
+.nz-dt-bottom-left, .nz-dt-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: var(--nz-sp-2);
+}
+
+/* Search input: ocupar más ancho disponible */
+.dataTables_wrapper .dataTables_filter input {
+    min-width: 240px;
+}
+
+@media (max-width: 540px) {
+    .dataTables_wrapper .dataTables_filter input { min-width: 0; width: 100%; }
+    .nz-dt-top-left, .nz-dt-top-right { width: 100%; }
 }

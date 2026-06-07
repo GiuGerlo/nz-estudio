@@ -287,3 +287,20 @@ Este proyecto tiene un servidor **CodeGraph MCP** configurado (`codegraph_*` too
 ### Si `.codegraph/` no existe
 
 El MCP server responde "not initialized." Preguntar al usuario: *"Veo que el proyecto no tiene CodeGraph inicializado. ¿Querés que corra `codegraph init -i` para construir el índice?"*
+
+## 16. Context7 MCP — docs actualizadas de librerías
+
+Servidor **Context7 MCP** configurado (`mcp__context7_*`). Da acceso a documentación al día de librerías (DataTables, Bootstrap, SortableJS, PHP, MariaDB, jQuery, etc.) directamente desde la fuente oficial. **Usar SIEMPRE** antes de tirar config/código de librerías externas para evitar errores de syntax/opciones que no existan o que estén deprecadas.
+
+### Cuándo usar context7
+
+- Configurar/restilizar **DataTables** (opciones, pagingType, language, dom).
+- Componentes de **Bootstrap** (modal API, classes, JS hooks).
+- Plugins (SortableJS options, GLightbox config, AOS init, SweetAlert2).
+- Sintaxis/funciones de PHP, mysqli, etc., cuando hay duda de versión.
+
+### Reglas
+
+- **No inventar opciones**. Antes de escribir un config no trivial, resolver el ID de la librería con context7 y consultar el snippet relevante.
+- **Citar la versión**. La mayoría de los CDNs del proyecto pinean versión (Bootstrap 5.3.2, jQuery 3.7, DataTables 1.13.7). Pedir docs de esa versión.
+- **Si context7 no responde** (no inicializado, sin conexión), avisar al usuario y NO seguir adivinando: pedir confirmación antes de escribir el config.

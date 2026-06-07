@@ -1,130 +1,131 @@
 <!-- Modal Propiedad -->
 <div class="modal fade" id="modalPropiedad" tabindex="-1" aria-labelledby="modalPropiedadLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header">
                 <h5 class="modal-title" id="modalPropiedadLabel">
-                    <i class="fas fa-building me-2"></i>Nueva Propiedad
+                    <i class="fa-solid fa-building"></i> Nueva propiedad
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+
             <form id="formPropiedad" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="id" id="propiedad_id">
 
-                    <!-- Campos del formulario con estilos mejorados -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="titulo" name="titulo" required>
-                                <label for="titulo"><i class="fas fa-heading me-2"></i>Título</label>
-                            </div>
+                    <!-- Sección: Datos básicos -->
+                    <div class="nz-form-section">
+                        <div class="nz-form-section-head">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <h6>Datos básicos</h6>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <select class="form-select" id="categoria" name="categoria" required>
-                                    <option value="">Seleccionar categoría</option>
-                                    <?php
-                                    $categorias = $db->query("SELECT * FROM tipos_propiedad ORDER BY nombre_categoria");
-                                    while ($cat = $categorias->fetch_assoc()):
-                                    ?>
-                                        <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['nombre_categoria']); ?></option>
-                                    <?php endwhile; ?>
-                                </select>
-                                <label for="categoria"><i class="fas fa-tag me-2"></i>Categoría</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="localidad" name="localidad" required>
-                                <label for="localidad"><i class="fas fa-map-marker-alt me-2"></i>Localidad</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="tamanio" name="tamanio">
-                                <label for="tamanio"><i class="fas fa-ruler me-2"></i>Tamaño</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Campos de texto con estilo mejorado -->
-                    <div class="card card-accent-blue mb-4">
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-3 text-muted"><i class="fas fa-info-circle me-2"></i>Detalles de la Propiedad</h6>
-
-                            <div class="form-floating mb-3">
-                                <textarea class="form-control" id="ubicacion" name="ubicacion" style="height: 100px"></textarea>
-                                <label for="ubicacion"><i class="fas fa-map me-2"></i>Ubicación</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <textarea class="form-control" id="servicios" name="servicios" style="height: 100px"></textarea>
-                                <label for="servicios"><i class="fas fa-concierge-bell me-2"></i>Servicios</label>
-                                <small class="text-muted">Separar servicios con comas</small>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <textarea class="form-control" id="caracteristicas" name="caracteristicas" style="height: 100px"></textarea>
-                                <label for="caracteristicas"><i class="fas fa-list me-2"></i>Características</label>
-                                <small class="text-muted">Separar características con comas</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección de Mapa -->
-                    <div class="card card-accent-green mb-4">
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-3 text-muted"><i class="fas fa-map-marked-alt me-2"></i>Ubicación en Mapa</h6>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" id="latitud" name="latitud" placeholder="Latitud">
-                                        <label for="latitud"><i class="fas fa-map-marker-alt me-2"></i>Latitud</label>
-                                        <small class="text-muted">Ejemplo: -32.8768202575293</small>
-                                    </div>
+                        <div class="nz-form-section-body">
+                            <div class="nz-form-grid">
+                                <div class="nz-field-group full">
+                                    <label for="titulo">Título <span class="req">*</span></label>
+                                    <input type="text" class="nz-input" id="titulo" name="titulo" required>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" id="longitud" name="longitud" placeholder="Longitud">
-                                        <label for="longitud"><i class="fas fa-map-marker-alt me-2"></i>Longitud</label>
-                                        <small class="text-muted">Ejemplo: -61.026038894990506</small>
-                                    </div>
+                                <div class="nz-field-group">
+                                    <label for="categoria">Categoría <span class="req">*</span></label>
+                                    <select class="nz-select" id="categoria" name="categoria" required>
+                                        <option value="">Seleccionar categoría</option>
+                                        <?php
+                                        $categorias = $db->query("SELECT * FROM tipos_propiedad ORDER BY nombre_categoria");
+                                        while ($cat = $categorias->fetch_assoc()):
+                                        ?>
+                                            <option value="<?php echo (int)$cat['id']; ?>">
+                                                <?php echo htmlspecialchars($cat['nombre_categoria']); ?>
+                                            </option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </div>
+                                <div class="nz-field-group">
+                                    <label for="localidad">Localidad</label>
+                                    <input type="text" class="nz-input" id="localidad" name="localidad">
+                                </div>
+                                <div class="nz-field-group full">
+                                    <label for="tamanio">Tamaño</label>
+                                    <input type="text" class="nz-input" id="tamanio" name="tamanio" placeholder="Ej: 250 m²">
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="form-floating">
-                                <textarea class="form-control" id="mapa" name="mapa" style="height: 120px"></textarea>
-                                <label for="mapa">iframe de Google Maps</label>
+                    <!-- Sección: Detalles -->
+                    <div class="nz-form-section">
+                        <div class="nz-form-section-head">
+                            <i class="fa-solid fa-align-left"></i>
+                            <h6>Detalles</h6>
+                        </div>
+                        <div class="nz-form-section-body">
+                            <div class="nz-field-group" style="margin-bottom: var(--nz-sp-4);">
+                                <label for="ubicacion">Ubicación</label>
+                                <textarea class="nz-textarea" id="ubicacion" name="ubicacion" rows="3"></textarea>
+                            </div>
+                            <div class="nz-field-group" style="margin-bottom: var(--nz-sp-4);">
+                                <label for="servicios">Servicios</label>
+                                <textarea class="nz-textarea" id="servicios" name="servicios" rows="3"></textarea>
+                                <small class="nz-field-hint">Separar con comas (ej: Agua, Luz, Gas)</small>
+                            </div>
+                            <div class="nz-field-group">
+                                <label for="caracteristicas">Características</label>
+                                <textarea class="nz-textarea" id="caracteristicas" name="caracteristicas" rows="3"></textarea>
+                                <small class="nz-field-hint">Separar con comas (ej: 3 dormitorios, Pileta, Cochera)</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sección de Imágenes -->
-                    <div class="card card-accent-purple">
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-3 text-muted"><i class="fas fa-images me-2"></i>Imágenes de la Propiedad</h6>
-                            <div class="mb-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-upload"></i></span>
-                                    <input type="file" class="form-control" id="imagenes" name="imagenes[]" multiple accept="image/*">
+                    <!-- Sección: Ubicación en mapa -->
+                    <div class="nz-form-section">
+                        <div class="nz-form-section-head">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <h6>Ubicación en mapa</h6>
+                        </div>
+                        <div class="nz-form-section-body">
+                            <div class="nz-form-grid" style="margin-bottom: var(--nz-sp-4);">
+                                <div class="nz-field-group">
+                                    <label for="latitud">Latitud</label>
+                                    <input type="text" class="nz-input" id="latitud" name="latitud" placeholder="-32.876820">
+                                    <small class="nz-field-hint">Decimal, entre -90 y 90</small>
                                 </div>
-                                <small class="text-muted">Seleccione una o más imágenes</small>
+                                <div class="nz-field-group">
+                                    <label for="longitud">Longitud</label>
+                                    <input type="text" class="nz-input" id="longitud" name="longitud" placeholder="-61.026038">
+                                    <small class="nz-field-hint">Decimal, entre -180 y 180</small>
+                                </div>
                             </div>
-                            <div id="preview-imagenes" class="mt-3 row g-3"></div>
+                            <div class="nz-field-group">
+                                <label for="mapa">Iframe de Google Maps</label>
+                                <textarea class="nz-textarea" id="mapa" name="mapa" rows="3"
+                                          placeholder='<iframe src="https://www.google.com/maps/embed?..."></iframe>'></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Imágenes -->
+                    <div class="nz-form-section">
+                        <div class="nz-form-section-head">
+                            <i class="fa-solid fa-images"></i>
+                            <h6>Imágenes</h6>
+                        </div>
+                        <div class="nz-form-section-body">
+                            <label for="imagenes" class="nz-file-drop">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p>Click o arrastrá imágenes acá</p>
+                                <small>JPG, PNG, GIF, WebP · máx 8MB c/u · 20 archivos máximo</small>
+                                <input type="file" id="imagenes" name="imagenes[]" multiple accept="image/*">
+                            </label>
+                            <div id="preview-imagenes" class="nz-img-preview-grid"></div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
+
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancelar
+                        <i class="fa-solid fa-xmark"></i> Cancelar
                     </button>
-                    <button type="submit" class="btn btn-custom-blue">
-                        <i class="fas fa-save me-2"></i>Guardar
+                    <button type="submit" class="btn nz-btn-sm nz-btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
                     </button>
                 </div>
             </form>
@@ -135,97 +136,144 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const previewDiv = document.getElementById('preview-imagenes');
+        const fileInput  = document.getElementById('imagenes');
+        const dropZone   = fileInput ? fileInput.closest('.nz-file-drop') : null;
         let existingImages = [];
 
-        // Función para actualizar el preview de imágenes existentes (de la base de datos)
-        function actualizarPreview(imagenes) {
-            existingImages = imagenes;
-            renderPreview();
-        }
-
-        // Función para renderizar el preview
+        // Preview de imágenes ya guardadas (modo edición). La primera es la "principal".
         function renderPreview() {
             previewDiv.innerHTML = '';
-            existingImages.forEach((imagen, index) => {
-                const col = document.createElement('div');
-                col.className = 'col-md-3';
-                col.innerHTML = `
-                    <div class="position-relative">
-                        <img src="../${imagen.ruta_imagen}" class="img-thumbnail" alt="Preview">
-                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1"
-                                onclick="eliminarImagen(${imagen.id})">
-                            <i class="fas fa-times"></i>
-                            </button>
-                    </div>
+            existingImages.forEach((imagen, idx) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'nz-img-preview' + (idx === 0 ? ' is-main' : '');
+                wrap.dataset.id = imagen.id;
+                wrap.innerHTML = `
+                    <img src="../${imagen.ruta_imagen}" alt="" draggable="false">
+                    ${idx === 0 ? '<span class="nz-img-badge">Principal</span>' : ''}
+                    <span class="nz-img-handle" title="Arrastrar para reordenar"><i class="fa-solid fa-up-down-left-right"></i></span>
+                    <button type="button" class="nz-img-preview-del" title="Eliminar">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 `;
-                previewDiv.appendChild(col);
+                wrap.querySelector('.nz-img-preview-del').addEventListener('click', () => eliminarImagen(imagen.id));
+                previewDiv.appendChild(wrap);
             });
+
+            // Sortable: drag-drop entre items, persistir orden en server
+            if (window.Sortable && previewDiv._sortable) {
+                previewDiv._sortable.destroy();
+            }
+            if (window.Sortable && existingImages.length > 1) {
+                previewDiv._sortable = Sortable.create(previewDiv, {
+                    animation: 150,
+                    handle: '.nz-img-handle',
+                    ghostClass: 'nz-img-ghost',
+                    onEnd: function () {
+                        const ids = Array.from(previewDiv.querySelectorAll('.nz-img-preview'))
+                                         .map(el => parseInt(el.dataset.id, 10));
+                        persistImageOrder(ids);
+                    }
+                });
+            }
         }
 
-        // Función para eliminar imagen existente
-        window.eliminarImagen = function(id) {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "Esta acción no se puede deshacer",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
+        function persistImageOrder(ids) {
             $.ajax({
                 url: 'controllers/controller_propiedades.php',
                 type: 'POST',
-                data: {
-                    action: 'eliminar_imagen',
-                            id: id
-                },
-                success: function(response) {
-                    let data = typeof response === 'string' ? JSON.parse(response) : response;
-                            if(data.success) {
-                                existingImages = existingImages.filter(img => img.id !== id);
-                                renderPreview();
-                                Swal.fire('¡Eliminado!', 'La imagen ha sido eliminada.', 'success');
+                data: { action: 'update_image_order', imagenes: JSON.stringify(ids) },
+                success: function (resp) {
+                    const data = typeof resp === 'string' ? JSON.parse(resp) : resp;
+                    if (data.success) {
+                        // Reordenar el array local y rerender para mover el badge "Principal"
+                        existingImages.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+                        renderPreview();
                     } else {
-                                Swal.fire('Error', data.message || 'Error al eliminar la imagen', 'error');
-                            }
-                        }
-                    });
+                        Swal.fire('Error', data.message || 'No se pudo guardar el orden', 'error');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo guardar el orden', 'error');
                 }
+            });
+        }
+
+        window.eliminarImagen = function(id) {
+            Swal.fire({
+                title: '¿Eliminar imagen?',
+                text: 'No se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((r) => {
+                if (!r.isConfirmed) return;
+                $.ajax({
+                    url: 'controllers/controller_propiedades.php',
+                    type: 'POST',
+                    data: { action: 'eliminar_imagen', id: id },
+                    success: function(response) {
+                        const data = typeof response === 'string' ? JSON.parse(response) : response;
+                        if (data.success) {
+                            existingImages = existingImages.filter(img => img.id !== id);
+                            renderPreview();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Eliminada',
+                                showConfirmButton: false,
+                                timer: 1000
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'No se pudo eliminar', 'error');
+                        }
+                    }
+                });
             });
         };
 
-        // Preview de nuevas imágenes
-        document.getElementById('imagenes').addEventListener('change', function(e) {
-            const files = e.target.files;
-            previewDiv.innerHTML = '';
-
-            for(let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if(file.type.startsWith('image/')) {
+        // Preview de nuevas imágenes seleccionadas
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const files = e.target.files;
+                previewDiv.innerHTML = '';
+                existingImages = [];
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (!file.type.startsWith('image/')) continue;
                     const reader = new FileReader();
-                    const col = document.createElement('div');
-                    col.className = 'col-md-3';
-
-                    reader.onload = function(e) {
-                        col.innerHTML = `
-                            <div class="position-relative">
-                                <img src="${e.target.result}" class="img-thumbnail" alt="Preview">
-                            </div>
-                        `;
+                    const wrap = document.createElement('div');
+                    wrap.className = 'nz-img-preview';
+                    reader.onload = function(ev) {
+                        wrap.innerHTML = `<img src="${ev.target.result}" alt="">`;
                     };
-
                     reader.readAsDataURL(file);
-                    previewDiv.appendChild(col);
+                    previewDiv.appendChild(wrap);
                 }
-            }
-        });
+            });
+        }
 
-        // Función global para actualizar el preview de imágenes
+        // Drag & drop visual feedback
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('is-dragover');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('is-dragover');
+                });
+            });
+        }
+
+        // API global usada por editarPropiedad()
         window.actualizarPreviewImagenes = function(imagenes) {
-            actualizarPreview(imagenes);
+            existingImages = imagenes;
+            renderPreview();
         };
     });
 </script>

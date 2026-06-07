@@ -16,6 +16,21 @@ function sendJsonResponse($success, $message, $data = null)
     exit;
 }
 
+/**
+ * Borra un directorio si está vacío. No falla si tiene contenido o no existe.
+ */
+function nz_rmdir_if_empty(string $dir): bool
+{
+    if (!is_dir($dir)) return false;
+    // scandir > 2 = tiene archivos (más allá de . y ..)
+    $items = @scandir($dir);
+    if ($items === false) return false;
+    foreach ($items as $i) {
+        if ($i !== '.' && $i !== '..') return false;
+    }
+    return @rmdir($dir);
+}
+
 function convertToWebP($source, $destination, $quality = 82)
 {
     // Validar mime real con finfo (no confiar en metadata del cliente ni en getimagesize)
@@ -99,6 +114,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Reordenar imágenes de una propiedad (drag-drop en modal)
+    if ($action === 'update_image_order') {
+        try {
+            // Soporta payload por JSON o por POST form-urlencoded.
+            $imagenes = $input['imagenes'] ?? null;
+            if (!$imagenes && isset($_POST['imagenes'])) {
+                $imagenes = json_decode($_POST['imagenes'], true);
+            }
+            if (!is_array($imagenes)) {
+                throw new Exception('Lista de imágenes inválida');
+            }
+
+            $db->begin_transaction();
+            $stmt = $db->prepare("UPDATE imagenes_propiedades SET orden = ? WHERE id = ?");
+            foreach ($imagenes as $idx => $img_id) {
+                $img_id = (int)$img_id;
+                $orden = $idx + 1;
+                $stmt->bind_param('ii', $orden, $img_id);
+                if (!$stmt->execute()) {
+                    throw new Exception('Error al actualizar orden');
+                }
+            }
+            $db->commit();
+            sendJsonResponse(true, 'Orden de imágenes actualizado');
+        } catch (Exception $e) {
+            $db->rollback();
+            sendJsonResponse(false, 'Error: ' . $e->getMessage());
+        }
+        exit;
+    }
+
     // Eliminar propiedad (antes era GET → vulnerable a CSRF)
     if ($action === 'eliminar') {
         try {
@@ -107,16 +153,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('ID inválido');
             }
 
-            // Borrar archivos físicos de imágenes
+            // Borrar archivos físicos + recolectar dirs para limpieza
             $stmt = $db->prepare("SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = ?");
             $stmt->bind_param('i', $id);
             $stmt->execute();
             $res = $stmt->get_result();
+            $dirs_to_clean = [];
             while ($img = $res->fetch_assoc()) {
                 $path = '../../' . $img['ruta_imagen'];
                 if (is_file($path)) {
                     @unlink($path);
                 }
+                $dirs_to_clean[dirname($path)] = true;
+            }
+
+            // Borrar carpetas vacías (id, y categoria si queda vacía).
+            foreach (array_keys($dirs_to_clean) as $d) {
+                nz_rmdir_if_empty($d);                 // .../uploads/propiedades/<cat>/<id>
+                nz_rmdir_if_empty(dirname($d));        // .../uploads/propiedades/<cat>
             }
 
             // Borrar registros (FK no en cascada → manual)
@@ -171,6 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Imagen no encontrada');
             }
             $path = '../../' . $row['ruta_imagen'];
+            $dir  = dirname($path);
             if (is_file($path)) {
                 @unlink($path);
             }
@@ -179,6 +234,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$stmt->execute()) {
                 throw new Exception('Error al borrar el registro');
             }
+            // Si la carpeta de la propiedad quedó vacía, borrarla (y la de categoría si también).
+            nz_rmdir_if_empty($dir);
+            nz_rmdir_if_empty(dirname($dir));
             sendJsonResponse(true, 'Imagen eliminada');
         } catch (Exception $e) {
             sendJsonResponse(false, 'Error: ' . $e->getMessage());
@@ -288,7 +346,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('No se pudo crear el directorio de imágenes.');
                 }
 
-                $stmt_img = $db->prepare("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen) VALUES (?, ?)");
+                // Próximo orden = MAX(orden) + 1 sobre la propiedad
+                $stmt_max = $db->prepare("SELECT COALESCE(MAX(orden), 0) AS m FROM imagenes_propiedades WHERE id_propiedad = ?");
+                $stmt_max->bind_param('i', $propiedad_id);
+                $stmt_max->execute();
+                $next_orden = (int)$stmt_max->get_result()->fetch_assoc()['m'];
+
+                $stmt_img = $db->prepare("INSERT INTO imagenes_propiedades (id_propiedad, ruta_imagen, orden) VALUES (?, ?, ?)");
 
                 for ($i = 0; $i < $total_files; $i++) {
                     // Armar struct $_FILES individual para nz_validate_upload
@@ -318,7 +382,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $ruta_imagen  = 'uploads/propiedades/' . $categoria_nombre . '/' . $propiedad_id . '/' . $webp_name;
 
                     if (convertToWebP($file['tmp_name'], $dest_path)) {
-                        $stmt_img->bind_param('is', $propiedad_id, $ruta_imagen);
+                        $next_orden++;
+                        $stmt_img->bind_param('isi', $propiedad_id, $ruta_imagen, $next_orden);
                         $stmt_img->execute();
                         $uploaded_count++;
                     } else {
@@ -352,13 +417,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($_GET['id'])) {
                 $id = (int)$_GET['id'];
 
-                // Obtener los datos de la propiedad incluyendo la categoría
-                $query = "SELECT p.*, 
+                // Obtener los datos de la propiedad incluyendo la categoría.
+                // Las imágenes vienen ordenadas por `orden ASC` (drag-drop persistido).
+                $query = "SELECT p.*,
                         tp.nombre_categoria,
-                        (SELECT GROUP_CONCAT(CONCAT(id, ':', ruta_imagen)) 
-                         FROM imagenes_propiedades 
+                        (SELECT GROUP_CONCAT(CONCAT(id, ':', ruta_imagen) ORDER BY orden ASC, id ASC)
+                         FROM imagenes_propiedades
                          WHERE id_propiedad = p.id) as imagenes_data
-                        FROM propiedades p 
+                        FROM propiedades p
                         LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id
                         WHERE p.id = ?";
 

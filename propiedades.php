@@ -11,7 +11,7 @@ $categorias = $db->query("SELECT * FROM tipos_propiedad ORDER BY nombre_categori
 
 // Query base para propiedades
 $base_query = "SELECT p.*, tp.nombre_categoria,
-              (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id LIMIT 1) as imagen_principal,
+              (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) as imagen_principal,
               (SELECT COUNT(*) FROM imagenes_propiedades WHERE id_propiedad = p.id) as total_imagenes
               FROM propiedades p 
               LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id
