@@ -112,9 +112,10 @@
                             <label for="imagenes" class="nz-file-drop">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
                                 <p>Click o arrastrá imágenes acá</p>
-                                <small>JPG, PNG, GIF, WebP · máx 8MB c/u · 20 archivos máximo</small>
+                                <small>JPG, PNG, GIF, WebP · se comprimen a 1920px antes de subir · máx 20</small>
                                 <input type="file" id="imagenes" name="imagenes[]" multiple accept="image/*">
                             </label>
+                            <div id="compression-status" class="nz-compress-status" hidden></div>
                             <div id="preview-imagenes" class="nz-img-preview-grid"></div>
                         </div>
                     </div>
@@ -133,7 +134,47 @@
     </div>
 </div>
 
+<!-- browser-image-compression: cliente comprime y resize a WebP antes del upload -->
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+
+<style>
+.nz-compress-status {
+    margin-top: var(--nz-sp-3);
+    padding: 8px 12px;
+    background: var(--nz-surface-2);
+    border: 1px solid var(--nz-border);
+    border-radius: var(--nz-radius-sm);
+    font-size: var(--nz-fs-sm);
+    color: var(--nz-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.nz-compress-status.is-done { color: var(--nz-success); background: var(--nz-success-soft); border-color: var(--nz-success); }
+.nz-compress-badge {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(0,0,0,.7);
+    color: white;
+    font-size: .68rem;
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: var(--nz-radius-sm);
+    letter-spacing: .02em;
+    max-width: calc(100% - 12px);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.nz-compress-badge.is-ok   { background: var(--nz-success); }
+.nz-compress-badge.is-warn { background: var(--nz-warning); }
+</style>
+
 <script>
+    // Flag global: true mientras se comprime, bloquea submit en propiedades.php
+    window.nzImagesReady = true;
+
     document.addEventListener('DOMContentLoaded', function() {
         const previewDiv = document.getElementById('preview-imagenes');
         const fileInput  = document.getElementById('imagenes');
@@ -185,8 +226,10 @@
                 success: function (resp) {
                     const data = typeof resp === 'string' ? JSON.parse(resp) : resp;
                     if (data.success) {
-                        // Reordenar el array local y rerender para mover el badge "Principal"
-                        existingImages.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+                        // Normalizar IDs a Number — server devuelve string, ids son number
+                        existingImages.sort((a, b) =>
+                            ids.indexOf(Number(a.id)) - ids.indexOf(Number(b.id))
+                        );
                         renderPreview();
                     } else {
                         Swal.fire('Error', data.message || 'No se pudo guardar el orden', 'error');
@@ -233,24 +276,114 @@
             });
         };
 
-        // Preview de nuevas imágenes seleccionadas
+        // Preview + compresión client-side de nuevas imágenes seleccionadas
+        const statusEl = document.getElementById('compression-status');
+        const MAX_FILES = 20;
+        const COMPRESSION_OPTS = {
+            maxSizeMB: 2,            // tope final ~2MB
+            maxWidthOrHeight: 1920,  // resize si excede
+            useWebWorker: true,
+            initialQuality: 0.82,
+            fileType: 'image/webp'   // entregar WebP al server (server igual hace fallback)
+        };
+
+        function fmtSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        async function compressAndPreview(files) {
+            if (typeof imageCompression === 'undefined') {
+                console.warn('browser-image-compression no cargado, subiendo sin comprimir');
+                return Array.from(files);
+            }
+
+            window.nzImagesReady = false;
+            const compressed = [];
+            let totalOrig = 0;
+            let totalNew  = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) continue;
+
+                const wrap = previewDiv.children[i];
+                const statusBadge = wrap ? wrap.querySelector('.nz-compress-badge') : null;
+                if (statusBadge) statusBadge.textContent = 'Comprimiendo...';
+
+                try {
+                    const out = await imageCompression(file, COMPRESSION_OPTS);
+                    // Renombrar para preservar nombre base (server usa el name)
+                    const safeName = file.name.replace(/\.[^.]+$/, '') + '.webp';
+                    const renamed  = new File([out], safeName, { type: out.type, lastModified: Date.now() });
+                    compressed.push(renamed);
+                    totalOrig += file.size;
+                    totalNew  += out.size;
+                    if (statusBadge) {
+                        statusBadge.textContent = `${fmtSize(file.size)} → ${fmtSize(out.size)}`;
+                        statusBadge.classList.add('is-ok');
+                    }
+                } catch (err) {
+                    console.error('Compresión fallida en', file.name, err);
+                    compressed.push(file); // fallback: enviar original
+                    if (statusBadge) {
+                        statusBadge.textContent = 'Sin comprimir';
+                        statusBadge.classList.add('is-warn');
+                    }
+                }
+            }
+
+            // Reemplazar input.files con los comprimidos
+            const dt = new DataTransfer();
+            compressed.forEach(f => dt.items.add(f));
+            fileInput.files = dt.files;
+
+            // Status global
+            const saved = totalOrig - totalNew;
+            const pct   = totalOrig > 0 ? Math.round((saved / totalOrig) * 100) : 0;
+            statusEl.hidden = false;
+            statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${compressed.length} imagen(es) lista(s) · ${fmtSize(totalOrig)} → ${fmtSize(totalNew)} (${pct}% menos)`;
+            statusEl.classList.add('is-done');
+
+            window.nzImagesReady = true;
+            // Notificar al submit handler de propiedades.php
+            document.dispatchEvent(new CustomEvent('nz:images-ready'));
+
+            return compressed;
+        }
+
         if (fileInput) {
-            fileInput.addEventListener('change', function(e) {
-                const files = e.target.files;
+            fileInput.addEventListener('change', function (e) {
+                let files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
+
+                if (files.length > MAX_FILES) {
+                    Swal.fire('Demasiados archivos', `Máximo ${MAX_FILES} imágenes por subida. Se tomaron las primeras ${MAX_FILES}.`, 'warning');
+                    files = files.slice(0, MAX_FILES);
+                }
+
                 previewDiv.innerHTML = '';
                 existingImages = [];
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (!file.type.startsWith('image/')) continue;
-                    const reader = new FileReader();
+                statusEl.hidden = false;
+                statusEl.classList.remove('is-done');
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparando imágenes...';
+
+                files.forEach((file) => {
+                    if (!file.type.startsWith('image/')) return;
                     const wrap = document.createElement('div');
                     wrap.className = 'nz-img-preview';
-                    reader.onload = function(ev) {
-                        wrap.innerHTML = `<img src="${ev.target.result}" alt="">`;
-                    };
+                    wrap.innerHTML = `
+                        <img alt="" draggable="false">
+                        <span class="nz-compress-badge">En cola...</span>
+                    `;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { wrap.querySelector('img').src = ev.target.result; };
                     reader.readAsDataURL(file);
                     previewDiv.appendChild(wrap);
-                }
+                });
+
+                compressAndPreview(files);
             });
         }
 

@@ -117,7 +117,9 @@ include_once 'includes/head.php';
                                     <?php foreach ($imagenes as $index => $imagen): ?>
                                         <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
                                             <img src="<?php echo htmlspecialchars($imagen['ruta_imagen']); ?>"
-                                                alt="<?php echo htmlspecialchars($propiedad['titulo']); ?> - Imagen <?php echo $index + 1; ?>">
+                                                alt="<?php echo htmlspecialchars($propiedad['titulo']); ?> - Imagen <?php echo $index + 1; ?>"
+                                                <?php echo $index === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'; ?>
+                                                decoding="async">
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -151,7 +153,7 @@ include_once 'includes/head.php';
                                         <div class="thumbnail-item <?php echo $index === 0 ? 'active' : ''; ?>"
                                             data-bs-target="#propertyCarousel"
                                             data-bs-slide-to="<?php echo $index; ?>">
-                                            <img src="<?php echo htmlspecialchars($imagen['ruta_imagen']); ?>" alt="Thumbnail <?php echo $index + 1; ?>">
+                                            <img src="<?php echo htmlspecialchars($imagen['ruta_imagen']); ?>" alt="Thumbnail <?php echo $index + 1; ?>" loading="lazy" decoding="async">
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -162,6 +164,7 @@ include_once 'includes/head.php';
                             <div class="main-carousel">
                                 <img src="<?php echo htmlspecialchars($imagenes[0]['ruta_imagen']); ?>"
                                     alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>"
+                                    loading="eager" fetchpriority="high" decoding="async"
                                     style="width: 100%; height: 500px; object-fit: contain; background: #fff;">
                             </div>
                         <?php endif; ?>
@@ -172,6 +175,7 @@ include_once 'includes/head.php';
                         <div class="main-carousel">
                             <img src="assets/img/no-image.jpg"
                                 alt="Sin imagen disponible"
+                                loading="eager" decoding="async"
                                 style="width: 100%; height: 500px; object-fit: contain; background: #fff;">
                         </div>
                     </div>
@@ -375,9 +379,9 @@ include_once 'includes/head.php';
                             <div class="related-card">
                                 <div class="related-image">
                                     <?php if ($related['imagen_principal']): ?>
-                                        <img src="<?php echo htmlspecialchars($related['imagen_principal']); ?>" alt="<?php echo htmlspecialchars($related['titulo']); ?>">
+                                        <img src="<?php echo htmlspecialchars($related['imagen_principal']); ?>" alt="<?php echo htmlspecialchars($related['titulo']); ?>" loading="lazy" decoding="async">
                                     <?php else: ?>
-                                        <img src="assets/img/no-image.jpg" alt="Sin imagen">
+                                        <img src="assets/img/no-image.jpg" alt="Sin imagen" loading="lazy" decoding="async">
                                     <?php endif; ?>
                                 </div>
 

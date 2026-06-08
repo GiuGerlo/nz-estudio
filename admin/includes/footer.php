@@ -25,5 +25,13 @@
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
     <?php endif; ?>
+
+    <?php
+    // Script específico de la página: se carga AL FINAL, después de todas las
+    // dependencias (jQuery, DataTables, Bootstrap, etc.). La página lo setea
+    // antes de `require_once 'includes/footer.php'`.
+    if (isset($pageScript) && $pageScript): ?>
+        <script src="<?php echo htmlspecialchars($pageScript, ENT_QUOTES); ?>"></script>
+    <?php endif; ?>
 </body>
 </html>

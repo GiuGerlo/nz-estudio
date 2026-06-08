@@ -100,9 +100,10 @@ $base_query = "SELECT p.*, tp.nombre_categoria,
                                 <div class="property-image">
                                     <?php if ($propiedad['imagen_principal']): ?>
                                         <img src="<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
-                                            alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>">
+                                            alt="<?php echo htmlspecialchars($propiedad['titulo']); ?>"
+                                            loading="lazy" decoding="async">
                                     <?php else: ?>
-                                        <img src="assets/img/no-image.jpg" alt="Sin imagen">
+                                        <img src="assets/img/no-image.jpg" alt="Sin imagen" loading="lazy" decoding="async">
                                     <?php endif; ?>
                                 </div>
                                 <div class="property-content">
