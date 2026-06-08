@@ -3,76 +3,75 @@ require_once '../config/config.php';
 $includeDataTablesStyles = true;
 require_once 'includes/head.php';
 
-// Obtener las propiedades vendidas
-$query = "SELECT p.*, tp.nombre_categoria, 
-         (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) as imagen_principal
-         FROM propiedades p 
-         LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id 
-         WHERE vendida = 1
-         ORDER BY p.id DESC";
-$resultado = $db->query($query);
+$resultado = $db->query(
+    "SELECT p.*, tp.nombre_categoria,
+            (SELECT ruta_imagen FROM imagenes_propiedades WHERE id_propiedad = p.id ORDER BY orden ASC, id ASC LIMIT 1) AS imagen_principal
+     FROM propiedades p
+     LEFT JOIN tipos_propiedad tp ON p.categoria = tp.id
+     WHERE vendida = 1
+     ORDER BY p.id DESC"
+);
 ?>
 
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-building fa-2x text-primary me-3"></i>
+<div class="nz-page">
+
+    <header class="nz-page-header">
+        <div class="nz-page-title">
+            <div class="nz-page-title-icon"><i class="fa-solid fa-circle-check"></i></div>
             <div>
-                <h1 class="h3 mb-0">Propiedades Vendidas</h1>
-                <p class="text-muted mb-0">Listado de propiedades marcadas como vendidas</p>
+                <h1>Propiedades vendidas</h1>
+                <p>Archivo de propiedades marcadas como vendidas</p>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="tablaVendidas" class="table table-hover" style="width:100%">
+    <section class="nz-card">
+        <div class="nz-card-body" style="padding: var(--nz-sp-4);">
+            <div class="nz-table-wrap">
+                <table id="tablaVendidas" class="table align-middle" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 80px">ID</th>
-                            <th style="width: 100px">Imagen</th>
+                            <th style="width: 70px;">#</th>
+                            <th style="width: 90px;">Imagen</th>
                             <th>Título</th>
-                            <th style="width: 150px">Categoría</th>
-                            <th style="width: 150px">Localidad</th>
-                            <th class="text-center" style="width: 120px">Acciones</th>
+                            <th style="width: 160px;">Categoría</th>
+                            <th style="width: 160px;">Localidad</th>
+                            <th style="width: 120px; text-align: center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php while ($propiedad = $resultado->fetch_assoc()): ?>
                             <tr>
-                                <td class="text-center align-middle"><?php echo (int)$propiedad['id']; ?></td>
+                                <td class="nz-id" data-order="<?php echo (int)$propiedad['id']; ?>">#<?php echo (int)$propiedad['id']; ?></td>
                                 <td>
-                                    <div class="property-image-wrapper">
-                                        <?php if ($propiedad['imagen_principal']): ?>
-                                            <img src="../<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
-                                                 alt="Imagen de propiedad"
-                                                 class="property-image">
-                                        <?php else: ?>
-                                            <img src="../assets/img/no-image.jpg"
-                                                 alt="Sin imagen"
-                                                 class="property-image">
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php if ($propiedad['imagen_principal']): ?>
+                                        <img src="../<?php echo htmlspecialchars($propiedad['imagen_principal'], ENT_QUOTES, 'UTF-8'); ?>"
+                                             alt=""
+                                             style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--nz-border);">
+                                    <?php else: ?>
+                                        <div style="width:52px;height:52px;border-radius:8px;background:var(--nz-surface-3);display:grid;place-items:center;color:var(--nz-text-muted);">
+                                            <i class="fa-solid fa-image"></i>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
-                                <td class="align-middle fw-semibold"><?php echo htmlspecialchars($propiedad['titulo']); ?></td>
-                                <td class="align-middle">
-                                    <span class="badge rounded-pill bg-info text-white">
-                                        <?php echo htmlspecialchars($propiedad['nombre_categoria']); ?>
+                                <td style="font-weight: 600;"><?php echo htmlspecialchars($propiedad['titulo']); ?></td>
+                                <td>
+                                    <span class="nz-cat-pill">
+                                        <?php echo htmlspecialchars($propiedad['nombre_categoria'] ?? '—'); ?>
                                     </span>
                                 </td>
-                                <td class="align-middle"><?php echo htmlspecialchars($propiedad['localidad']); ?></td>
-                                <td class="text-center align-middle">
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-info" 
+                                <td><?php echo htmlspecialchars($propiedad['localidad']); ?></td>
+                                <td>
+                                    <div class="nz-table-actions" style="justify-content:center;width:100%;">
+                                        <button type="button" class="nz-icon-btn"
                                                 onclick="verPropiedad(<?php echo (int)$propiedad['id']; ?>)"
-                                                title="Ver">
-                                            <i class="fas fa-eye"></i>
+                                                title="Ver detalle">
+                                            <i class="fa-solid fa-eye"></i>
                                         </button>
-                                        <button type="button" class="btn btn-outline-danger" 
+                                        <button type="button" class="nz-icon-btn nz-icon-btn--danger"
                                                 onclick="confirmarEliminacionVendida(<?php echo (int)$propiedad['id']; ?>)"
                                                 title="Eliminar">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -82,118 +81,49 @@ $resultado = $db->query($query);
                 </table>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
-<!-- Modal solo lectura para ver propiedad -->
+<!-- Modal detalle de propiedad vendida -->
 <div class="modal fade" id="modalVerPropiedad" tabindex="-1" aria-labelledby="modalVerPropiedadLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalVerPropiedadLabel">Detalle de Propiedad</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div id="detallePropiedad">
-          <!-- Aquí se cargan los datos por JS -->
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalVerPropiedadLabel">
+                    <i class="fa-solid fa-eye"></i> Detalle de propiedad
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detallePropiedad"></div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
-
-<style>
-/* Estilos refinados */
-.property-image-wrapper {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.property-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.property-image:hover {
-    transform: scale(1.1);
-}
-
-.badge {
-    font-weight: 500;
-    font-size: 0.85rem;
-    padding: 0.5em 1em;
-}
-
-.btn-group .btn {
-    padding: 0.375rem 0.75rem;
-}
-
-.table > :not(caption) > * > * {
-    padding: 1rem 0.75rem;
-}
-
-.table tbody tr {
-    transition: background-color 0.2s ease;
-}
-
-.table tbody tr:hover {
-    background-color: rgba(0,0,0,0.02);
-}
-
-/* Personalización mejorada de DataTables */
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter {
-    margin-bottom: 1rem;
-}
-
-.dataTables_wrapper .dataTables_length label,
-.dataTables_wrapper .dataTables_filter label {
-    font-weight: 500;
-    color: #555;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #e9ecef !important;
-    border-color: #dee2e6 !important;
-    color: var(--color-accent) !important;
-}
-
-.dataTables_wrapper .dataTables_length select {
-    min-width: 80px;
-    margin: 0 5px;
-}
-
-.dataTables_info {
-    color: #666;
-    padding-top: 0.5rem;
-}
-</style>
 
 <script>
-$(document).ready(function() {
+$(document).ready(function () {
     $('#tablaVendidas').DataTable({
         responsive: true,
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json',
-            lengthMenu: 'Mostrar _MENU_ registros por página',
-            info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
-            infoEmpty: 'No hay registros disponibles',
-            search: 'Buscar:',
+            emptyTable: 'No hay propiedades vendidas',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ propiedades',
+            infoEmpty: 'Mostrando 0 propiedades',
+            infoFiltered: '(filtrado de _MAX_ totales)',
+            lengthMenu: 'Mostrar _MENU_',
+            search: '',
+            searchPlaceholder: 'Buscar...',
+            zeroRecords: 'Sin resultados',
             paginate: {
-                first: '«',
-                previous: '‹',
-                next: '›',
-                last: '»'
+                first:    '<i class="fa-solid fa-angles-left"></i>',
+                previous: '<i class="fa-solid fa-chevron-left"></i>',
+                next:     '<i class="fa-solid fa-chevron-right"></i>',
+                last:     '<i class="fa-solid fa-angles-right"></i>'
             }
         },
         pageLength: 25,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-        dom: '<"row mb-3"<"col-sm-6"l><"col-sm-6"f>>rtip',
+        dom: '<"nz-dt-top"<"nz-dt-top-left"l><"nz-dt-top-right"f>>rt<"nz-dt-bottom"<"nz-dt-bottom-left"i><"nz-dt-bottom-right"p>>',
         order: [[0, 'desc']],
         columnDefs: [
             { targets: [1], orderable: false },
@@ -202,103 +132,140 @@ $(document).ready(function() {
     });
 });
 
-// Doble confirmación para eliminar
 function confirmarEliminacionVendida(id) {
     Swal.fire({
-        title: '¿Estás seguro?',
-        text: "Esta acción eliminará la propiedad vendida.",
+        title: '¿Eliminar propiedad?',
+        text: 'Esta acción no se puede deshacer.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#64748b',
         confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: '¿Eliminar definitivamente?',
-                text: "No podrás recuperar esta propiedad.",
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((res2) => {
-                if (res2.isConfirmed) {
-                    $.ajax({
-                        url: 'controllers/controller_propiedades.php',
-                        type: 'POST',
-                        data: { action: 'eliminar', id: id },
-                        success: function(response) {
-                            const data = typeof response === 'string' ? JSON.parse(response) : response;
-                            if (data.success) {
-                                Swal.fire('¡Eliminado!', 'Propiedad eliminada', 'success')
-                                    .then(() => location.reload());
-                            } else {
-                                Swal.fire('Error', data.message || 'Error al eliminar', 'error');
-                            }
-                        },
-                        error: function() {
-                            Swal.fire('Error', 'No se pudo comunicar con el servidor', 'error');
-                        }
-                    });
+    }).then((r) => {
+        if (!r.isConfirmed) return;
+        $.ajax({
+            url: 'controllers/controller_propiedades.php',
+            type: 'POST',
+            data: { action: 'eliminar', id: id },
+            success: function (response) {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminada',
+                        showConfirmButton: false,
+                        timer: 1200
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.message || 'Error al eliminar', 'error');
                 }
-            });
-        }
+            },
+            error: function () {
+                Swal.fire('Error', 'No se pudo comunicar con el servidor', 'error');
+            }
+        });
     });
 }
 
-// Visualizar datos en modal solo lectura
 function verPropiedad(id) {
     $.ajax({
         url: 'controllers/controller_propiedades.php',
         type: 'GET',
-        data: {
-            action: 'obtener',
-            id: id
-        },
-        success: function(response) {
-            let data = typeof response === 'string' ? JSON.parse(response) : response;
-            if(data.success) {
-                let p = data.data;
-                // Usar la misma lógica de la tabla para la imagen principal
-                let imagen = p.imagen_principal ? '../' + p.imagen_principal : '../assets/img/no-image.jpg';
-                let html = `
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h5 class="mb-2">${p.titulo}</h5>
-                            <p><strong>Categoría:</strong> ${p.categoria_nombre || ''}</p>
-                            <p><strong>Localidad:</strong> ${p.localidad}</p>
-                            <p><strong>Ubicación:</strong> ${p.ubicacion || ''}</p>
-                            <p><strong>Tamaño:</strong> ${p.tamanio || ''}</p>
-                            <p><strong>Servicios:</strong> ${p.servicios || ''}</p>
-                            <p><strong>Características:</strong> ${p.caracteristicas || ''}</p>
-                            <p><strong>Mapa:</strong> ${p.mapa || ''}</p>
-                            <p><strong>Latitud:</strong> ${p.latitud || ''}</p>
-                            <p><strong>Longitud:</strong> ${p.longitud || ''}</p>
-                        </div>
-                    </div>
-                `;
-                $('#detallePropiedad').html(html);
-                $('#modalVerPropiedad').modal('show');
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: data.message || 'No se pudo cargar la propiedad'
-                });
+        data: { action: 'obtener', id: id },
+        success: function (response) {
+            const data = typeof response === 'string' ? JSON.parse(response) : response;
+            if (!data.success) {
+                Swal.fire('Error', data.message || 'No se pudo cargar la propiedad', 'error');
+                return;
             }
+            const p = data.data;
+            const rutaImg = (p.imagenes && p.imagenes.length > 0) ? p.imagenes[0].ruta_imagen : null;
+            const cover = rutaImg
+                ? `<img src="../${rutaImg}" alt="">`
+                : `<div class="nz-detalle-placeholder"><i class="fa-solid fa-image"></i></div>`;
+
+            const row = (label, value) => value
+                ? `<div class="nz-detalle-row"><span class="nz-detalle-label">${label}</span><span class="nz-detalle-value">${value}</span></div>`
+                : '';
+
+            const html = `
+                <div class="nz-detalle">
+                    <div class="nz-detalle-cover">${cover}</div>
+                    <div class="nz-detalle-body">
+                        <h4 class="nz-detalle-title">${p.titulo}</h4>
+                        ${row('Categoría', p.nombre_categoria || '')}
+                        ${row('Localidad', p.localidad || '')}
+                        ${row('Ubicación', p.ubicacion || '')}
+                        ${row('Tamaño', p.tamanio || '')}
+                        ${row('Servicios', p.servicios || '')}
+                        ${row('Características', p.caracteristicas || '')}
+                        ${row('Latitud', p.latitud || '')}
+                        ${row('Longitud', p.longitud || '')}
+                    </div>
+                </div>
+            `;
+            $('#detallePropiedad').html(html);
+            new bootstrap.Modal(document.getElementById('modalVerPropiedad')).show();
         },
-        error: function() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Error al comunicarse con el servidor'
-            });
+        error: function () {
+            Swal.fire('Error', 'Error al comunicarse con el servidor', 'error');
         }
     });
 }
 </script>
+
+<style>
+.nz-detalle {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--nz-sp-5);
+    align-items: start;
+}
+.nz-detalle-cover {
+    border-radius: var(--nz-radius);
+    overflow: hidden;
+    border: 1px solid var(--nz-border);
+    aspect-ratio: 1;
+    background: var(--nz-surface-3);
+}
+.nz-detalle-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nz-detalle-placeholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--nz-text-muted);
+    font-size: 2.2rem;
+}
+.nz-detalle-title {
+    margin: 0 0 var(--nz-sp-4);
+    color: var(--nz-text);
+    font-size: var(--nz-fs-lg);
+    font-weight: 700;
+}
+.nz-detalle-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--nz-sp-3);
+    padding: var(--nz-sp-2) 0;
+    border-bottom: 1px dashed var(--nz-border);
+    font-size: var(--nz-fs-sm);
+}
+.nz-detalle-row:last-child { border-bottom: 0; }
+.nz-detalle-label {
+    color: var(--nz-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--nz-fs-xs);
+    letter-spacing: .04em;
+}
+.nz-detalle-value { color: var(--nz-text); word-break: break-word; }
+@media (max-width: 640px) {
+    .nz-detalle { grid-template-columns: 1fr; }
+    .nz-detalle-cover { max-width: 240px; }
+    .nz-detalle-row { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
 
 <?php require_once 'includes/footer.php'; ?>
